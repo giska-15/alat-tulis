@@ -1,5 +1,13 @@
 ---
 const year = new Date().getFullYear();
+
+const baseUrl = import.meta.env.BASE_URL;
+const withBase = (path: string) => {
+	const base = String(baseUrl || "/");
+	const cleanBase = base.endsWith("/") ? base.slice(0, -1) : base;
+	if (path === "/") return `${cleanBase}/`;
+	return `${cleanBase}${path}`;
+};
 ---
 
 <footer class="mt-16 bg-black text-white" id="about">
@@ -23,10 +31,10 @@ const year = new Date().getFullYear();
 			<div>
 				<p class="text-sm font-semibold">Account</p>
 				<ul class="mt-3 space-y-2 text-sm text-white/70">
-					<li><a class="hover:text-white" href="/login">Login / Register</a></li>
-					<li><a class="hover:text-white" href="/cart">Cart</a></li>
-					<li><a class="hover:text-white" href="/wishlist">Wishlist</a></li>
-					<li><a class="hover:text-white" href="/products">Shop</a></li>
+					<li><a class="hover:text-white" href={withBase("/login")}>Login / Register</a></li>
+					<li><a class="hover:text-white" href={withBase("/cart")}>Cart</a></li>
+					<li><a class="hover:text-white" href={withBase("/wishlist")}>Wishlist</a></li>
+					<li><a class="hover:text-white" href={withBase("/products")}>Shop</a></li>
 				</ul>
 			</div>
 			<div id="contact">
@@ -35,7 +43,7 @@ const year = new Date().getFullYear();
 					<li><a class="hover:text-white" href="#">Privacy Policy</a></li>
 					<li><a class="hover:text-white" href="#">Terms Of Use</a></li>
 					<li><a class="hover:text-white" href="#">FAQ</a></li>
-					<li><a class="hover:text-white" href="/contact">Contact</a></li>
+					<li><a class="hover:text-white" href={withBase("/contact")}>Contact</a></li>
 				</ul>
 			</div>
 			<div>
@@ -44,12 +52,12 @@ const year = new Date().getFullYear();
 				<div class="mt-3 grid grid-cols-2 gap-3">
 					<div class="grid h-20 w-20 place-items-center rounded bg-white p-1 ring-1 ring-white/10">
 						<img
-							src="/images/qris.png"
+							src={withBase("/images/qris.png")}
 							alt="QRIS"
 							class="h-full w-full object-contain"
 							loading="lazy"
 							decoding="async"
-							onerror="this.onerror=null; this.src='/images/qris-placeholder.svg';"
+							onerror={`this.onerror=null; this.src='${withBase("/images/qris-placeholder.svg")}';`}
 						/>
 					</div>
 					<div class="space-y-2">

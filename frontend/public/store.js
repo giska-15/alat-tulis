@@ -101,7 +101,43 @@
 		}
 	}
 
-	var PLACEHOLDER_IMG = '/images/product-placeholder.svg';
+	function getAppBase() {
+		try {
+			var meta = document.querySelector('meta[name="app-base"]');
+			if (meta && meta.getAttribute) {
+				var v = String(meta.getAttribute('content') || '').trim();
+				if (v) return v;
+			}
+		} catch (_e) {
+			// ignore
+		}
+		return '/';
+	}
+
+	var APP_BASE = getAppBase();
+	function withBasePath(path) {
+		var p = String(path || '');
+		if (!p) return p;
+		// Don't touch absolute URLs.
+		if (/^https?:\/\//i.test(p)) return p;
+		// Normalize.
+		if (p[0] !== '/') p = '/' + p;
+		var base = String(APP_BASE || '/');
+		if (!base.endsWith('/')) base = base + '/';
+		if (base === '/') return p;
+		return base.replace(/\/$/, '') + p;
+	}
+
+	function stripBase(path) {
+		var p = String(path || '');
+		if (!p) return p;
+		var base = String(APP_BASE || '/');
+		if (!base.endsWith('/')) base = base + '/';
+		if (base === '/' || !p.startsWith(base.replace(/\/$/, ''))) return p;
+		return p.slice(base.replace(/\/$/, '').length) || '/';
+	}
+
+	var PLACEHOLDER_IMG = withBasePath('/images/product-placeholder.svg');
 
 	function parseAtIndex(name) {
 		if (!name) return null;
@@ -115,27 +151,27 @@
 	function fallbackImageUrl(product) {
 		var categoryId = product && product.category && product.category.id ? String(product.category.id) : '';
 		// category-level overrides (match src/lib/image.ts intent)
-		if (categoryId === 'PF' || categoryId === 'FB' || categoryId === 'BD') return '/images/catalog/at12.png';
-		if (categoryId === 'PG' || categoryId === 'AR') return '/images/catalog/at4.png';
-		if (categoryId === 'BK' || categoryId === 'KP' || categoryId === 'NT' || categoryId === 'EN') return '/images/catalog/at3.png';
+		if (categoryId === 'PF' || categoryId === 'FB' || categoryId === 'BD') return withBasePath('/images/catalog/at12.png');
+		if (categoryId === 'PG' || categoryId === 'AR') return withBasePath('/images/catalog/at4.png');
+		if (categoryId === 'BK' || categoryId === 'KP' || categoryId === 'NT' || categoryId === 'EN') return withBasePath('/images/catalog/at3.png');
 
 		var atIndex = parseAtIndex(product && product.name);
-		if (atIndex) return '/images/catalog/at' + String(atIndex) + '.png';
+		if (atIndex) return withBasePath('/images/catalog/at' + String(atIndex) + '.png');
 
 		var id = product && product.id != null ? Number(product.id) : 0;
 		var safe = Number.isFinite(id) ? Math.abs(id) : 0;
 		var idx = (safe % 6) + 1;
-		return '/images/catalog/fallback' + String(idx) + '.webp';
+		return withBasePath('/images/catalog/fallback' + String(idx) + '.webp');
 	}
 
 	function expectedCatalogImage(product) {
 		if (!product) return '';
 		var categoryId = product && product.category && product.category.id ? String(product.category.id) : '';
-		if (categoryId === 'PF' || categoryId === 'FB' || categoryId === 'BD') return '/images/catalog/at12.png';
-		if (categoryId === 'PG' || categoryId === 'AR') return '/images/catalog/at4.png';
-		if (categoryId === 'BK' || categoryId === 'KP' || categoryId === 'NT' || categoryId === 'EN') return '/images/catalog/at3.png';
+		if (categoryId === 'PF' || categoryId === 'FB' || categoryId === 'BD') return withBasePath('/images/catalog/at12.png');
+		if (categoryId === 'PG' || categoryId === 'AR') return withBasePath('/images/catalog/at4.png');
+		if (categoryId === 'BK' || categoryId === 'KP' || categoryId === 'NT' || categoryId === 'EN') return withBasePath('/images/catalog/at3.png');
 		var atIndex = parseAtIndex(product && product.name);
-		if (atIndex) return '/images/catalog/at' + String(atIndex) + '.png';
+		if (atIndex) return withBasePath('/images/catalog/at' + String(atIndex) + '.png');
 		return '';
 	}
 
@@ -158,14 +194,14 @@
 			var expected = expectedCatalogImage(l.product);
 			var url = l.product.imageUrl != null ? String(l.product.imageUrl).trim() : '';
 			if (expected) {
+				var raw = stripBase(url);
 				var shouldFix =
 					!url ||
 					url === 'undefined' ||
 					url === 'null' ||
-					url.indexOf('product-placeholder.svg') >= 0 ||
-					url.indexOf('/images/catalog/fallback') === 0 ||
-					url.indexOf('unsplash.com') >= 0 ||
-					url !== expected;
+					raw.indexOf('product-placeholder.svg') >= 0 ||
+					raw.indexOf('/images/catalog/fallback') === 0 ||
+					url.indexOf('unsplash.com') >= 0;
 				if (shouldFix) {
 					l.product.imageUrl = expected;
 					changed = true;
@@ -188,14 +224,14 @@
 			var expected = expectedCatalogImage(p);
 			var url = p.imageUrl != null ? String(p.imageUrl).trim() : '';
 			if (expected) {
+				var raw = stripBase(url);
 				var shouldFix =
 					!url ||
 					url === 'undefined' ||
 					url === 'null' ||
-					url.indexOf('product-placeholder.svg') >= 0 ||
-					url.indexOf('/images/catalog/fallback') === 0 ||
-					url.indexOf('unsplash.com') >= 0 ||
-					url !== expected;
+					raw.indexOf('product-placeholder.svg') >= 0 ||
+					raw.indexOf('/images/catalog/fallback') === 0 ||
+					url.indexOf('unsplash.com') >= 0;
 				if (shouldFix) {
 					p.imageUrl = expected;
 					wChanged = true;
@@ -348,7 +384,9 @@
 				resolveImageUrl(p) +
 				'" alt="' +
 				(p.name || 'Product') +
-				'" class="h-full w-full object-cover" loading="lazy" onerror="this.onerror=null; this.src=\'/images/product-placeholder.svg\';" />' +
+				'" class="h-full w-full object-cover" loading="lazy" onerror="this.onerror=null; this.src=\'' +
+				PLACEHOLDER_IMG +
+				'\';" />' +
 				'</a>' +
 				'<button class="absolute inset-x-0 bottom-0 translate-y-full bg-black py-2 text-center text-sm font-medium text-white transition group-hover:translate-y-0" type="button" data-action="add-to-cart">Add To Cart</button>' +
 				'</div>' +
@@ -404,7 +442,9 @@
 				resolveImageUrl(l.product) +
 				'" alt="' +
 				(l.product.name || 'Product') +
-				'" class="h-14 w-14 rounded bg-white object-cover ring-1 ring-zinc-100" loading="lazy" onerror="this.onerror=null; this.src=\'/images/product-placeholder.svg\';" />' +
+				'" class="h-14 w-14 rounded bg-white object-cover ring-1 ring-zinc-100" loading="lazy" onerror="this.onerror=null; this.src=\'' +
+				PLACEHOLDER_IMG +
+				'\';" />' +
 				'<div>' +
 				'<p class="line-clamp-2 max-w-[18rem] font-medium">' +
 				(l.product.name || 'Product') +
@@ -467,7 +507,9 @@
 				resolveImageUrl(l.product) +
 				'" alt="' +
 				(l.product.name || 'Product') +
-				'" class="h-12 w-12 rounded bg-white object-cover ring-1 ring-zinc-100" loading="lazy" onerror="this.onerror=null; this.src=\'/images/product-placeholder.svg\';" />' +
+				'" class="h-12 w-12 rounded bg-white object-cover ring-1 ring-zinc-100" loading="lazy" onerror="this.onerror=null; this.src=\'' +
+				PLACEHOLDER_IMG +
+				'\';" />' +
 				'<div>' +
 				'<p class="line-clamp-1 text-sm font-medium">' +
 				(l.product.name || 'Product') +

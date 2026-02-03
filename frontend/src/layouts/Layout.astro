@@ -2,6 +2,8 @@
 import "../styles/global.css";
 
 const { title = "Exclusive" } = Astro.props;
+
+const baseUrl = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
@@ -10,12 +12,39 @@ const { title = "Exclusive" } = Astro.props;
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>{title}</title>
+		<meta name="app-base" content={baseUrl} />
 	</head>
 	<body class="bg-zinc-50 text-zinc-900 antialiased">
 		<slot />
-		<script src="/store.js" defer></script>
+		<script src={`${baseUrl}store.js`} defer></script>
 		<script is:inline>
 			window.addEventListener('DOMContentLoaded', () => {
+				// GitHub Pages project sites are served under a base path (e.g. /alat-tulis/).
+				// This keeps existing absolute links (href="/...") working without editing every page.
+				try {
+					const meta = document.querySelector('meta[name="app-base"]');
+					const base = String(meta?.getAttribute('content') || '/');
+					const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+					if (cleanBase && cleanBase !== '') {
+						document.addEventListener(
+							'click',
+							(e) => {
+								const t = e.target;
+								if (!(t instanceof Element)) return;
+								const a = t.closest('a');
+								if (!(a instanceof HTMLAnchorElement)) return;
+								const href = a.getAttribute('href') || '';
+								if (!href || href[0] !== '/' || href.startsWith(cleanBase + '/')) return;
+								// Don't rewrite protocol-relative or special cases.
+								if (href.startsWith('//')) return;
+								e.preventDefault();
+								window.location.href = cleanBase + href;
+							},
+							true
+						);
+					}
+				} catch {}
+
 				window.ExclusiveStore?.initStoreUi?.();
 				// Trigger initial renders for pages that subscribe to these events.
 				try {

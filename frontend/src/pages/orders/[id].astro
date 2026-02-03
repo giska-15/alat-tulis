@@ -5,7 +5,23 @@ import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 
+export async function getStaticPaths() {
+	// GitHub Pages requires all dynamic routes to be statically enumerable.
+	// The real order data is fetched client-side, so we generate a small
+	// set of placeholder IDs to allow the build to complete.
+	return Array.from({ length: 20 }, (_, i) => ({ params: { id: String(i + 1) } }));
+}
+
 const { id } = Astro.params;
+
+const baseUrl = import.meta.env.BASE_URL;
+const withBase = (path: string) => {
+	if (!path) return baseUrl;
+	if (path.startsWith("http://") || path.startsWith("https://")) return path;
+	if (path.startsWith("#")) return path;
+	const p = path.startsWith("/") ? path.slice(1) : path;
+	return `${baseUrl}${p}`;
+};
 ---
 
 <Layout title={`Detail Pesanan #${id} | Exclusive`}>
@@ -15,7 +31,7 @@ const { id } = Astro.params;
 
 		<main class="mx-auto max-w-6xl px-4">
 			<section class="py-8">
-				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "My Orders", href: "/orders" }, { label: `Order #${id}` }]} />
+				<Breadcrumbs items={[{ label: "Home", href: withBase("/") }, { label: "My Orders", href: withBase("/orders") }, { label: `Order #${id}` }]} />
 
 				<div class="mt-10 rounded bg-white p-8 ring-1 ring-zinc-200">
 					<div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -23,7 +39,7 @@ const { id } = Astro.params;
 							<h1 class="text-2xl font-semibold">Detail Pesanan</h1>
 							<p class="mt-1 text-sm text-zinc-600">Ringkasan invoice, resi, dan item pesanan.</p>
 						</div>
-						<a href="/orders" class="mt-3 inline-flex w-fit rounded border border-zinc-300 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 md:mt-0">Kembali</a>
+						<a href={withBase("/orders")} class="mt-3 inline-flex w-fit rounded border border-zinc-300 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 md:mt-0">Kembali</a>
 					</div>
 
 					<div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">

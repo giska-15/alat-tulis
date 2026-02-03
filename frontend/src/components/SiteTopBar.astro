@@ -1,5 +1,13 @@
 ---
 const { rightText = "English" } = Astro.props;
+
+const baseUrl = import.meta.env.BASE_URL;
+const withBase = (path: string) => {
+	const base = String(baseUrl || "/");
+	const cleanBase = base.endsWith("/") ? base.slice(0, -1) : base;
+	if (path === "/") return `${cleanBase}/`;
+	return `${cleanBase}${path}`;
+};
 ---
 
 <div class="bg-black text-white">
@@ -7,7 +15,7 @@ const { rightText = "English" } = Astro.props;
 		<div></div>
 		<p class="text-center text-white/90">
 			Summer Sale For All Stationery Items And Free Express Delivery — OFF 50%!
-			<a class="ml-2 font-semibold underline underline-offset-2" href="/products">ShopNow</a>
+			<a class="ml-2 font-semibold underline underline-offset-2" href={withBase("/products")}>ShopNow</a>
 		</p>
 		<div class="hidden items-center justify-end gap-2 md:flex">
 			<span class="text-white/80">{rightText}</span>
