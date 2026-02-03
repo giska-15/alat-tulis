@@ -1,0 +1,57 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteTopBar from "../../components/SiteTopBar.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { fetchHome } from "../../lib/api";
+import type { HomePayload } from "../../lib/api";
+
+const emptyHome: HomePayload = {
+	categories: [],
+	bestSelling: [],
+	explore: [],
+	newArrival: [],
+	themeCategoryId: "AT",
+};
+
+const data: HomePayload = await fetchHome().catch(() => emptyHome);
+const products = (data.explore.length ? data.explore : data.bestSelling).slice(0, 12);
+---
+
+<Layout title="Products | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Products" }]} />
+
+				<div class="mt-10 flex items-center justify-between">
+					<h1 class="text-3xl font-semibold">Products</h1>
+					<div class="hidden items-center gap-3 md:flex">
+						<select class="h-11 rounded border border-zinc-300 bg-white px-3 text-sm">
+							<option>Default Sorting</option>
+							<option>Price: Low to High</option>
+							<option>Price: High to Low</option>
+						</select>
+						<select class="h-11 rounded border border-zinc-300 bg-white px-3 text-sm">
+							<option>Show 12</option>
+							<option>Show 24</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+					{products.map((p) => (
+						<ProductCard product={p} />
+					))}
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

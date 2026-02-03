@@ -1,0 +1,124 @@
+---
+const {
+	mode = "login",
+	redirectTo = "/account",
+} = Astro.props as {
+	mode?: "login" | "signup";
+	redirectTo?: string;
+};
+
+const envClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID as string | undefined;
+
+// If env is missing, we'll fetch it from backend at runtime (/api/public/config)
+// so the user only needs to set backend GOOGLE_CLIENT_ID.
+const apiBase = import.meta.env.PUBLIC_API_BASE || "http://localhost:4000";
+
+const storageKey = "exclusive_google_user_v1";
+---
+
+<div
+	class="w-full"
+	data-google-auth-root
+	data-client-id={envClientId ?? ""}
+	data-api-base={apiBase}
+	data-storage-key={storageKey}
+	data-mode={mode}
+	data-redirect={redirectTo}
+>
+	<div class="rounded border border-zinc-200 bg-white px-3 py-2" data-google-btn></div>
+	{!envClientId ? (
+		<p class="mt-2 text-xs text-zinc-500">
+			Isi <code class="font-mono">GOOGLE_CLIENT_ID</code> di <code class="font-mono">backend/.env</code> (atau <code class="font-mono">PUBLIC_GOOGLE_CLIENT_ID</code> di <code class="font-mono">frontend/.env</code>).
+		</p>
+	) : null}
+</div>
+
+<script is:inline>
+	(async () => {
+		const root = document.querySelector('[data-google-auth-root]');
+		if (!(root instanceof HTMLElement)) return;
+
+		const initialClientId = root.dataset.clientId || '';
+		const apiBase = root.dataset.apiBase || 'http://localhost:4000';
+		const storageKey = root.dataset.storageKey || 'exclusive_google_user_v1';
+		const mode = root.dataset.mode || 'login';
+		const redirectTo = root.dataset.redirect || '/account';
+		const btnHost = root.querySelector('[data-google-btn]');
+		if (!(btnHost instanceof HTMLElement)) return;
+
+		const loadScript = () =>
+			new Promise((resolve, reject) => {
+				if (window.google && window.google.accounts && window.google.accounts.id) return resolve(true);
+				const s = document.createElement('script');
+				s.src = 'https://accounts.google.com/gsi/client';
+				s.async = true;
+				s.defer = true;
+				s.onload = () => resolve(true);
+				s.onerror = () => reject(new Error('Failed to load Google Identity Services'));
+				document.head.appendChild(s);
+			});
+
+		const getClientId = async () => {
+			if (initialClientId && String(initialClientId).trim()) return String(initialClientId).trim();
+			try {
+				const r = await fetch(`${apiBase}/api/public/config`);
+				const j = await r.json();
+				const id = j?.data?.googleClientId;
+				if (id && String(id).trim()) return String(id).trim();
+			} catch {}
+			return '';
+		};
+
+		const verifyWithBackend = async (credential) => {
+			const r = await fetch(`${apiBase}/api/auth/google`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ credential }),
+			});
+			const j = await r.json().catch(() => null);
+			if (!r.ok) throw new Error(j?.error?.message || 'Google login gagal');
+			return j?.data?.user;
+		};
+
+		try {
+			const clientId = await getClientId();
+			if (!clientId) {
+				btnHost.innerHTML = `<button type="button" disabled class="w-full rounded bg-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-500">Google sign-in belum dikonfigurasi</button>`;
+				return;
+			}
+
+			await loadScript();
+			window.google.accounts.id.initialize({
+				client_id: clientId,
+				callback: async (resp) => {
+					try {
+						const credential = resp && resp.credential;
+						if (!credential) throw new Error('Google login gagal');
+						const user = await verifyWithBackend(credential);
+						if (!user) throw new Error('Google login gagal');
+
+						try {
+							window.localStorage.setItem(storageKey, JSON.stringify({ user }));
+						} catch {}
+						window.dispatchEvent(new CustomEvent('auth:changed'));
+						window.location.href = redirectTo;
+					} catch (e) {
+						console.error(e);
+						alert(e?.message || 'Google login gagal');
+					}
+				},
+			});
+
+			window.google.accounts.id.renderButton(btnHost, {
+				theme: 'outline',
+				size: 'large',
+				text: mode === 'signup' ? 'signup_with' : 'signin_with',
+				shape: 'rectangular',
+				width: btnHost.clientWidth || 360,
+			});
+		} catch (e) {
+			btnHost.innerHTML = `<button type="button" disabled class="w-full rounded bg-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-500">Gagal memuat Google</button>`;
+		}
+	})();
+</script>

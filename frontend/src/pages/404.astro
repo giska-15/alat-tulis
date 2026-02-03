@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+
+<Layout title="404 Not Found | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "404 Error" }]} />
+
+				<div class="mt-14 text-center">
+					<h1 class="text-6xl font-semibold tracking-tight">404 Not Found</h1>
+					<p class="mt-5 text-sm text-zinc-600">Your visited page not found. You may go home page.</p>
+					<a href="/" class="mt-10 inline-flex rounded bg-red-500 px-8 py-3 text-sm font-semibold text-white hover:bg-red-600">Back to home page</a>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

@@ -1,0 +1,136 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import GoogleAuthButton from "../components/GoogleAuthButton.astro";
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+---
+
+<Layout title="Sign Up | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="signup" />
+
+		<main class="mx-auto max-w-6xl px-4 py-12">
+			<section class="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
+				<div class="overflow-hidden rounded bg-zinc-100">
+					<img
+						src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1400&q=70"
+						alt="Toko alat tulis"
+						class="h-[360px] w-full object-cover md:h-[420px]"
+						loading="lazy"
+					/>
+				</div>
+
+				<div class="mx-auto w-full max-w-md">
+					<h1 class="text-2xl font-semibold tracking-tight">Create an account</h1>
+					<p class="mt-2 text-sm text-zinc-600">Enter your details below</p>
+
+					<form class="mt-8 space-y-6" data-signup-form>
+						<div>
+							<label class="sr-only" for="signup-name">Name</label>
+							<input
+								id="signup-name"
+								name="name"
+								type="text"
+								placeholder="Name"
+								required
+								class="w-full border-b border-zinc-300 bg-transparent pb-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+							/>
+						</div>
+						<div>
+							<label class="sr-only" for="signup-identifier">Email or Phone Number</label>
+							<input
+								id="signup-identifier"
+								name="identifier"
+								type="text"
+								placeholder="Email or Phone Number"
+								required
+								class="w-full border-b border-zinc-300 bg-transparent pb-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+							/>
+						</div>
+						<div>
+							<label class="sr-only" for="signup-password">Password</label>
+							<input
+								id="signup-password"
+								name="password"
+								type="password"
+								placeholder="Password"
+								required
+								class="w-full border-b border-zinc-300 bg-transparent pb-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-900"
+							/>
+						</div>
+
+						<p class="hidden rounded bg-red-50 px-3 py-2 text-sm text-red-600 ring-1 ring-red-100" data-signup-error></p>
+
+						<button type="submit" class="w-full rounded bg-red-500 px-7 py-3 text-sm font-semibold text-white hover:bg-red-600" data-signup-submit>
+							Create Account
+						</button>
+
+						<GoogleAuthButton mode="signup" redirectTo="/account" />
+
+						<p class="pt-2 text-center text-sm text-zinc-600">
+							Already have account?
+							<a class="ml-2 font-medium text-zinc-900 hover:underline" href="/login">Log in</a>
+						</p>
+					</form>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline define:vars={{ apiBase }}>
+			(() => {
+				const form = document.querySelector('[data-signup-form]');
+				const errorEl = document.querySelector('[data-signup-error]');
+				const submitBtn = document.querySelector('[data-signup-submit]');
+				if (!(form instanceof HTMLFormElement)) return;
+
+				const setError = (msg) => {
+					if (!(errorEl instanceof HTMLElement)) return;
+					errorEl.textContent = String(msg || 'Signup gagal');
+					errorEl.style.display = 'block';
+				};
+
+				form.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					if (errorEl instanceof HTMLElement) errorEl.style.display = 'none';
+					if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = true;
+					try {
+						const fd = new FormData(form);
+						const name = String(fd.get('name') || '').trim();
+						const identifier = String(fd.get('identifier') || '').trim();
+						const password = String(fd.get('password') || '');
+						const res = await fetch(`${apiBase}/api/auth/register`, {
+							method: 'POST',
+							credentials: 'include',
+							headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+							body: JSON.stringify({ name, identifier, password }),
+						});
+						const json = await res.json().catch(() => null);
+						if (!res.ok) throw new Error(json?.error?.message || `Signup failed: ${res.status}`);
+						try { window.dispatchEvent(new CustomEvent('auth:changed')); } catch {}
+						window.location.href = '/account';
+					} catch (err) {
+						setError(err?.message || 'Signup gagal');
+					} finally {
+						if (submitBtn instanceof HTMLButtonElement) submitBtn.disabled = false;
+					}
+				});
+			})();
+		</script>
+
+		<a
+			href="#top"
+			class="fixed bottom-6 right-6 grid h-10 w-10 place-items-center rounded-full bg-white text-zinc-700 shadow ring-1 ring-zinc-200 hover:bg-zinc-50"
+			aria-label="Back to top"
+		>
+			<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+				<path d="M12 5l-6 6h4v8h4v-8h4l-6-6Z" />
+			</svg>
+		</a>
+	</div>
+</Layout>

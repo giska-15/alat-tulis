@@ -1,0 +1,147 @@
+---
+import Icons from "./Icons.astro";
+
+type Active = "home" | "contact" | "about" | "signup" | "none";
+const { active = "none" } = Astro.props as { active?: Active; accountName?: string };
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+
+const linkClass = (key: Active) =>
+	"hover:text-zinc-900" + (active === key ? " text-zinc-900 underline underline-offset-8" : "");
+---
+
+<header class="relative z-50 border-b border-zinc-100 bg-white">
+	<div class="mx-auto grid max-w-6xl grid-cols-2 items-center gap-4 px-4 py-4 md:grid-cols-3">
+		<div class="flex items-center">
+			<a href="/" class="text-lg font-semibold tracking-tight">Exclusive</a>
+		</div>
+		<nav class="hidden items-center justify-center gap-6 text-sm text-zinc-700 md:flex">
+			<a class={linkClass("home")} href="/">Home</a>
+			<a class={linkClass("contact")} href="/contact">Contact</a>
+			<a class={linkClass("about")} href="/about">About</a>
+			<a class={linkClass("signup")} href="/signup">Sign Up</a>
+		</nav>
+		<div class="flex items-center justify-end gap-3">
+			<div class="hidden items-center gap-2 rounded bg-zinc-50 px-4 py-2 ring-1 ring-zinc-200 md:flex">
+				<input
+					type="search"
+					placeholder="What are you looking for?"
+					class="w-56 bg-transparent text-sm outline-none placeholder:text-zinc-400"
+				/>
+				<Icons name="search" class="h-4 w-4 text-zinc-500" />
+			</div>
+			<a class="relative grid h-10 w-10 place-items-center rounded-full hover:bg-zinc-50" href="/wishlist" aria-label="Wishlist">
+				<Icons name="heart" class="h-5 w-5" />
+				<span data-store-count="wishlist" class="absolute -right-1 -top-1 hidden h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">0</span>
+			</a>
+			<a class="relative grid h-10 w-10 place-items-center rounded-full hover:bg-zinc-50" href="/cart" aria-label="Cart">
+				<Icons name="cart" class="h-5 w-5" />
+				<span data-store-count="cart" class="absolute -right-1 -top-1 hidden h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">0</span>
+			</a>
+			<details class="relative hidden md:block" data-account-menu data-api-base={apiBase}>
+				<summary
+					class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+					aria-label="Account menu"
+				>
+					<Icons name="user" class="h-5 w-5" />
+				</summary>
+				<div class="absolute right-0 z-50 mt-2 w-56 overflow-x-hidden overflow-y-auto rounded-md bg-zinc-700/95 text-white shadow-xl ring-1 ring-black/10 backdrop-blur max-h-80">
+					<div class="pointer-events-none absolute right-4 top-[-6px] h-3 w-3 rotate-45 bg-zinc-700/95"></div>
+					<div class="px-4 py-3 text-xs text-white/80" data-auth-status>Checking session…</div>
+					<div data-auth-logged-out class="hidden">
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/login">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<path d="M10 17l-1 4h10l-1-4" />
+								<path d="M12 3v10" />
+								<path d="M8 7l4-4 4 4" />
+							</svg>
+							Login
+						</a>
+					</div>
+					<div data-auth-logged-in class="hidden">
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/account">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<path d="M20 21a8 8 0 0 0-16 0" />
+								<circle cx="12" cy="8" r="4" />
+							</svg>
+							Manage My Account
+						</a>
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/orders">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<path d="M7 4h10v16H7z" />
+								<path d="M9 8h6" />
+								<path d="M9 12h6" />
+							</svg>
+							My Order
+						</a>
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/cancellations">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<circle cx="12" cy="12" r="9" />
+								<path d="M8.5 8.5l7 7" />
+							</svg>
+							My Cancellations
+						</a>
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/reviews">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<path d="M12 17.5l-5.5 3 1.4-6.1L3 9.9l6.2-.5L12 3.6l2.8 5.8 6.2.5-4.9 4.5 1.4 6.1-5.5-3Z" />
+							</svg>
+							My Reviews
+						</a>
+						<a class="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10" href="/logout">
+							<svg viewBox="0 0 24 24" class="h-4 w-4 text-white/90" fill="none" stroke="currentColor" stroke-width="1.8">
+								<path d="M10 17l-1 4h10l-1-4" />
+								<path d="M12 3v10" />
+								<path d="M8 7l4-4 4 4" />
+							</svg>
+							Logout
+						</a>
+					</div>
+				</div>
+			</details>
+		</div>
+	</div>
+
+	<style>
+		details > summary::-webkit-details-marker { display: none; }
+		details[open] > summary { background: rgb(239 68 68); }
+	</style>
+
+	<script is:inline>
+		(() => {
+			const menu = document.querySelector('[data-account-menu]');
+			if (!(menu instanceof HTMLDetailsElement)) return;
+			const apiBase = menu.dataset.apiBase || 'http://localhost:4000';
+			const status = menu.querySelector('[data-auth-status]');
+			const loggedIn = menu.querySelector('[data-auth-logged-in]');
+			const loggedOut = menu.querySelector('[data-auth-logged-out]');
+			const setState = (isAuthed, user) => {
+				if (status instanceof HTMLElement) {
+					status.textContent = isAuthed ? `Hi, ${user?.name || user?.email || 'User'}` : 'Not logged in';
+				}
+				if (loggedIn instanceof HTMLElement) loggedIn.classList.toggle('hidden', !isAuthed);
+				if (loggedOut instanceof HTMLElement) loggedOut.classList.toggle('hidden', isAuthed);
+			};
+
+			const check = async () => {
+				try {
+					const r = await fetch(`${apiBase}/api/auth/me`, { credentials: 'include' });
+					if (!r.ok) return setState(false, null);
+					const j = await r.json().catch(() => null);
+					setState(true, j?.data?.user || null);
+				} catch {
+					setState(false, null);
+				}
+			};
+
+			check();
+			window.addEventListener('auth:changed', check);
+			document.addEventListener('click', (e) => {
+				if (!menu.open) return;
+				const target = e.target;
+				if (!(target instanceof Node)) return;
+				if (menu.contains(target)) return;
+				menu.open = false;
+			});
+		})();
+	</script>
+</header>

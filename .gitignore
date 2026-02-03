@@ -1,0 +1,40 @@
+# Root ignore rules (monorepo: backend + frontend)
+
+# Dependencies
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/build/
+**/.astro/
+**/.vite/
+
+# Logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# Environment / secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Local/OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/
+
+# Python venv (present in your workspace)
+.venv/
+
+# Local databases
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Misc local scratch files
+cookiejar*.txt

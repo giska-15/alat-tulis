@@ -1,0 +1,164 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+
+<Layout title="Pesanan Berhasil | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Checkout", href: "/checkout" }, { label: "Pesanan Berhasil" }]} />
+
+				<div class="mt-10 rounded bg-white p-8 ring-1 ring-zinc-200">
+					<div class="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
+						<div class="flex items-start gap-4">
+							<div class="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+								<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M20 6L9 17l-5-5" />
+								</svg>
+							</div>
+							<div>
+								<h1 class="text-2xl font-semibold">Pesanan berhasil dibuat</h1>
+								<p class="mt-1 text-sm text-zinc-600">Terima kasih! Detail invoice dan nomor resi ada di bawah.</p>
+							</div>
+						</div>
+
+						<div class="flex gap-3">
+							<a href="/products" class="rounded border border-zinc-300 px-4 py-2 text-sm font-semibold hover:bg-zinc-50">Belanja Lagi</a>
+							<a href="/orders" class="rounded bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600">Lihat Pesanan</a>
+						</div>
+					</div>
+
+					<div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+						<div class="rounded border border-zinc-200 p-5">
+							<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Invoice</p>
+							<p class="mt-2 text-lg font-semibold" data-invoice>-</p>
+							<p class="mt-1 text-xs text-zinc-500">Simpan invoice ini untuk referensi pembayaran/komplain.</p>
+						</div>
+
+						<div class="rounded border border-zinc-200 p-5">
+							<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Nomor Resi</p>
+							<p class="mt-2 text-lg font-semibold" data-resi>-</p>
+							<p class="mt-1 text-xs text-zinc-500">Gunakan nomor resi untuk cek status pengiriman.</p>
+						</div>
+					</div>
+
+					<div class="mt-6 rounded bg-zinc-50 p-5 ring-1 ring-zinc-200">
+						<div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+							<div class="flex items-center justify-between gap-4">
+								<span class="text-zinc-600">Order ID</span>
+								<span class="font-semibold" data-orderid>-</span>
+							</div>
+							<div class="flex items-center justify-between gap-4">
+								<span class="text-zinc-600">Tanggal</span>
+								<span class="font-semibold" data-date>-</span>
+							</div>
+							<div class="flex items-center justify-between gap-4">
+								<span class="text-zinc-600">Total</span>
+								<span class="font-semibold" data-total>-</span>
+							</div>
+							<div class="flex items-center justify-between gap-4">
+								<span class="text-zinc-600">Metode</span>
+								<span class="font-semibold" data-method>-</span>
+							</div>
+						</div>
+					</div>
+
+					<p class="mt-6 hidden text-sm text-red-600" data-empty>
+						Tidak ada data pesanan terbaru. Silakan lakukan checkout terlebih dulu.
+					</p>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline>
+			const invEl = document.querySelector('[data-invoice]');
+			const resiEl = document.querySelector('[data-resi]');
+			const idEl = document.querySelector('[data-orderid]');
+			const dateEl = document.querySelector('[data-date]');
+			const totalEl = document.querySelector('[data-total]');
+			const methodEl = document.querySelector('[data-method]');
+			const emptyEl = document.querySelector('[data-empty]');
+
+			const formatRupiah = (n) => {
+				try {
+					return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(n || 0));
+				} catch {
+					return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+				}
+			};
+
+			const getTracking = (orderId) => {
+				try {
+					const raw = localStorage.getItem('exclusive_tracking_by_order');
+					const map = raw ? JSON.parse(raw) : {};
+					return map && orderId != null ? map[String(orderId)] || null : null;
+				} catch {
+					return null;
+				}
+			};
+
+			const setEmpty = () => {
+				if (emptyEl instanceof HTMLElement) emptyEl.classList.remove('hidden');
+			};
+
+			const fill = (payload) => {
+				if (!payload) return;
+				if (invEl) invEl.textContent = payload.invoiceNumber || '-';
+				if (resiEl) resiEl.textContent = payload.trackingNumber || '-';
+				if (idEl) idEl.textContent = payload.orderId != null ? String(payload.orderId) : '-';
+				if (dateEl) dateEl.textContent = payload.createdAt ? new Date(payload.createdAt).toLocaleString('id-ID') : new Date().toLocaleString('id-ID');
+				if (totalEl) totalEl.textContent = formatRupiah(payload.total || 0);
+				if (methodEl) methodEl.textContent = payload.methodLabel || '-';
+			};
+
+			async function loadFromQuery() {
+				const sp = new URLSearchParams(window.location.search);
+				const orderId = sp.get('orderId');
+				if (!orderId) return false;
+				try {
+					const res = await fetch(`/api/sales/${encodeURIComponent(String(orderId))}`, { headers: { Accept: 'application/json' } });
+					const json = await res.json().catch(() => null);
+					if (!res.ok) throw new Error(json?.error?.message || `Request failed: ${res.status}`);
+					const o = json?.data;
+					if (!o) throw new Error('no-data');
+
+					const trackingNumber = o?.trackingNumber || getTracking(o?.id) || null;
+					fill({
+						orderId: o?.id ?? null,
+						invoiceNumber: o?.receiptNumber || (o?.id != null ? `INV-${o.id}` : '-'),
+						trackingNumber,
+						total: o?.total ?? 0,
+						createdAt: o?.orderDate ?? new Date().toISOString(),
+						methodLabel: o?.method?.method || (o?.methodId ? String(o.methodId) : '-'),
+					});
+					return true;
+				} catch {
+					return false;
+				}
+			}
+
+			(async () => {
+				const ok = await loadFromQuery();
+				if (ok) return;
+				try {
+					const raw = sessionStorage.getItem('exclusive_last_order') || localStorage.getItem('exclusive_last_order');
+					const data = raw ? JSON.parse(raw) : null;
+					if (!data) return setEmpty();
+					const trackingNumber = data.orderId != null ? getTracking(data.orderId) || data.trackingNumber : data.trackingNumber;
+					fill({ ...data, trackingNumber });
+				} catch {
+					setEmpty();
+				}
+			})();
+		</script>
+	</div>
+</Layout>

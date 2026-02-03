@@ -1,0 +1,282 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Customers" active="customers">
+	<div class="flex items-center justify-between">
+		<h1 class="text-lg font-semibold">Customer</h1>
+		<div class="flex items-center gap-3">
+			<div class="rounded-xl border border-zinc-200 bg-white px-4 py-2">
+				<p class="text-[10px] text-zinc-500">Jumlah customer</p>
+				<div class="mt-0.5 flex items-center gap-2">
+					<div class="grid h-7 w-7 place-items-center rounded-full bg-red-50 text-red-600">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+							<circle cx="12" cy="7" r="4" />
+						</svg>
+					</div>
+					<p id="stat-customers" class="text-base font-semibold leading-none">-</p>
+				</div>
+			</div>
+			<button id="btn-add" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold hover:bg-zinc-50">
+				<span class="grid h-7 w-7 place-items-center rounded-full bg-red-50 text-red-600">
+					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 5v14" />
+						<path d="M5 12h14" />
+					</svg>
+				</span>
+				Tambah Customer
+			</button>
+		</div>
+	</div>
+
+	<div class="mt-4 overflow-x-auto">
+		<table class="min-w-full text-xs">
+				<thead>
+					<tr class="bg-zinc-100 text-left text-[10px] uppercase tracking-wide text-zinc-500">
+						<th class="rounded-l-xl px-4 py-3">ID</th>
+						<th class="px-4 py-3">Nama</th>
+						<th class="px-4 py-3">Email</th>
+						<th class="px-4 py-3">No Telepon</th>
+						<th class="rounded-r-xl px-4 py-3 text-right">Aksi</th>
+					</tr>
+				</thead>
+				<tbody id="customers-body"></tbody>
+		</table>
+		<p id="customers-empty" class="mt-4 hidden text-sm text-zinc-500">Belum ada data.</p>
+		<p id="customers-error" class="mt-4 hidden text-sm text-red-600"></p>
+	</div>
+
+	<dialog id="dlg" class="w-full max-w-2xl rounded-2xl p-0">
+		<form method="dialog" class="rounded-2xl bg-white">
+			<div class="border-b border-zinc-200 px-5 py-4">
+				<p id="dlg-title" class="text-sm font-semibold">Tambah Customer</p>
+				<p class="text-xs text-zinc-500">Edit = hapus + tambah (ID bisa berubah).</p>
+			</div>
+			<div class="grid gap-3 px-5 py-4 sm:grid-cols-2">
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">ID (8 karakter)</span>
+					<input name="id" required minlength="8" maxlength="8" class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Nama</span>
+					<input name="name" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm sm:col-span-2">
+					<span class="text-xs text-zinc-600">Alamat</span>
+					<input name="address" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Tempat Lahir</span>
+					<input name="placeOfBirth" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Tanggal Lahir</span>
+					<input name="dateOfBirth" type="date" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">No HP</span>
+					<input name="contactNumber" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Email</span>
+					<input name="email" type="email" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Gender</span>
+					<select name="genderId" required class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm">
+						<option value="L">L</option>
+						<option value="P">P</option>
+					</select>
+				</label>
+			</div>
+			<input type="hidden" name="__mode" value="create" />
+			<input type="hidden" name="__originalId" value="" />
+			<p id="form-error" class="px-5 pb-2 text-sm text-red-600"></p>
+			<div class="flex items-center justify-end gap-2 border-t border-zinc-200 px-5 py-4">
+				<button type="button" data-cancel class="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50">Batal</button>
+				<button id="btn-save" type="submit" class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800">Simpan</button>
+			</div>
+		</form>
+	</dialog>
+
+	<script type="module">
+		import { fetchCustomersSearch, createCustomer, deleteCustomer } from "/admin-api.js";
+
+		const tbody = document.getElementById("customers-body");
+		const emptyEl = document.getElementById("customers-empty");
+		const errEl = document.getElementById("customers-error");
+		const dlg = document.getElementById("dlg");
+		const formErr = document.getElementById("form-error");
+		const statEl = document.getElementById("stat-customers");
+		const dlgTitle = document.getElementById("dlg-title");
+		let customersById = new Map();
+
+		const ICON_EDIT = `
+			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 20h9" />
+				<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+			</svg>
+		`;
+		const ICON_TRASH = `
+			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M3 6h18" />
+				<path d="M8 6V4h8v2" />
+				<path d="M19 6l-1 14H6L5 6" />
+				<path d="M10 11v6" />
+				<path d="M14 11v6" />
+			</svg>
+		`;
+
+		function showListError(message) {
+			errEl.textContent = message;
+			errEl.classList.remove("hidden");
+		}
+
+		function clearListError() {
+			errEl.textContent = "";
+			errEl.classList.add("hidden");
+		}
+
+		function closestFromEvent(e, selector) {
+			const t = e?.target;
+			const el = t && t.nodeType === 3 ? t.parentElement : t;
+			return el && el.closest ? el.closest(selector) : null;
+		}
+
+		function renderRows(rows) {
+			tbody.innerHTML = "";
+			statEl.textContent = String(rows.length);
+			for (const c of rows) {
+				const tr = document.createElement("tr");
+				tr.innerHTML = `
+					<td class="border-b border-zinc-100 px-4 py-3 text-zinc-700">${c.id}</td>
+					<td class="border-b border-zinc-100 px-4 py-3">${c.name}</td>
+					<td class="border-b border-zinc-100 px-4 py-3 text-zinc-600">${c.email}</td>
+					<td class="border-b border-zinc-100 px-4 py-3 text-zinc-700">${c.contactNumber}</td>
+					<td class="border-b border-zinc-100 px-4 py-3 text-right">
+						<div class="inline-flex items-center gap-3">
+							<button title="Edit" data-edit="${c.id}" class="text-zinc-700 hover:text-zinc-900">${ICON_EDIT}</button>
+							<button title="Hapus" data-del="${c.id}" class="text-red-600 hover:text-red-700">${ICON_TRASH}</button>
+						</div>
+					</td>
+				`;
+				tbody.appendChild(tr);
+			}
+			emptyEl.classList.toggle("hidden", rows.length !== 0);
+		}
+
+		async function load() {
+			clearListError();
+			try {
+				const rows = await fetchCustomersSearch();
+				customersById = new Map(rows.map((c) => [c.id, c]));
+				renderRows(rows);
+			} catch (e) {
+				showListError(e?.message ?? String(e));
+			}
+		}
+
+		document.getElementById("btn-add").addEventListener("click", () => {
+			dlgTitle.textContent = "Tambah Customer";
+			formErr.textContent = "";
+			dlg.querySelector('input[name="__mode"]').value = "create";
+			dlg.querySelector('input[name="__originalId"]').value = "";
+			dlg.showModal();
+		});
+
+		dlg.querySelector("[data-cancel]")?.addEventListener("click", () => {
+			formErr.textContent = "";
+			dlg.close("cancel");
+		});
+
+		dlg.addEventListener("close", () => {
+			formErr.textContent = "";
+			dlgTitle.textContent = "Tambah Customer";
+			const form = dlg.querySelector("form");
+			form?.reset();
+			const mode = dlg.querySelector('input[name="__mode"]');
+			const originalId = dlg.querySelector('input[name="__originalId"]');
+			if (mode) mode.value = "create";
+			if (originalId) originalId.value = "";
+		});
+
+		dlg.querySelector("form").addEventListener("submit", async (e) => {
+			e.preventDefault();
+			formErr.textContent = "";
+			const fd = new FormData(e.currentTarget);
+			const mode = String(fd.get("__mode") || "create");
+			const originalId = String(fd.get("__originalId") || "").trim();
+			const input = {
+				id: String(fd.get("id") || "").trim(),
+				name: String(fd.get("name") || "").trim(),
+				address: String(fd.get("address") || "").trim(),
+				placeOfBirth: String(fd.get("placeOfBirth") || "").trim(),
+				dateOfBirth: String(fd.get("dateOfBirth") || "").trim(),
+				contactNumber: String(fd.get("contactNumber") || "").trim(),
+				email: String(fd.get("email") || "").trim(),
+				genderId: String(fd.get("genderId") || "L"),
+			};
+			try {
+				if (mode === "edit" && originalId) {
+					await deleteCustomer(originalId);
+				}
+				await createCustomer(input);
+				dlg.close();
+				await load();
+			} catch (err) {
+				formErr.textContent = err?.message ?? String(err);
+			}
+		});
+
+		tbody.addEventListener("click", async (e) => {
+			const delBtn = closestFromEvent(e, "button[data-del]");
+			if (delBtn) {
+				const id = delBtn.getAttribute("data-del");
+				if (!id) return;
+				if (!confirm(`Hapus customer ${id}?`)) return;
+				try {
+					await deleteCustomer(id);
+					await load();
+				} catch (err) {
+					showListError(err?.message ?? String(err));
+				}
+				return;
+			}
+
+			const editBtn = closestFromEvent(e, "button[data-edit]");
+			if (editBtn) {
+				const id = editBtn.getAttribute("data-edit");
+				if (!id) return;
+				const row = Array.from(tbody.querySelectorAll("tr")).find((tr) => tr.querySelector("button[data-edit]")?.getAttribute("data-edit") === id);
+				if (!row) return;
+
+				dlgTitle.textContent = "Edit Customer";
+				formErr.textContent = "";
+				dlg.querySelector('input[name="__mode"]').value = "edit";
+				dlg.querySelector('input[name="__originalId"]').value = id;
+
+				const c = customersById.get(id);
+				if (c) {
+					dlg.querySelector('input[name="id"]').value = c.id;
+					dlg.querySelector('input[name="name"]').value = c.name;
+					dlg.querySelector('input[name="address"]').value = c.address;
+					dlg.querySelector('input[name="placeOfBirth"]').value = c.placeOfBirth;
+					// date input expects yyyy-mm-dd
+					const d = new Date(c.dateOfBirth);
+					const yyyy = String(d.getFullYear());
+					const mm = String(d.getMonth() + 1).padStart(2, "0");
+					const dd = String(d.getDate()).padStart(2, "0");
+					dlg.querySelector('input[name="dateOfBirth"]').value = `${yyyy}-${mm}-${dd}`;
+					dlg.querySelector('input[name="contactNumber"]').value = c.contactNumber;
+					dlg.querySelector('input[name="email"]').value = c.email;
+					dlg.querySelector('select[name="genderId"]').value = c.genderId;
+				}
+
+				dlg.showModal();
+			}
+		});
+
+		load();
+	</script>
+</AdminLayout>

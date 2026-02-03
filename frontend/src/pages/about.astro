@@ -1,0 +1,132 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import StatCard from "../components/StatCard.astro";
+
+const stats = [
+	{ icon: "bag", value: "10.5k", label: "Sellers active on our site" },
+	{ icon: "coin", value: "33k", label: "Monthly Product Sale", active: true },
+	{ icon: "shop", value: "45.5k", label: "Customer active in our site" },
+	{ icon: "money", value: "25k", label: "Annual gross sale in our site" },
+] as const;
+
+const team = [
+	{ name: "CAI XUKUN", role: "Founder & Chairman" },
+	{ name: "Tang San", role: "Managing Director" },
+	{ name: "Shi Hao", role: "Product Designer" },
+] as const;
+---
+
+<Layout title="About | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="about" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "About" }]} />
+
+				<div class="mt-10 grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
+					<div>
+						<h1 class="text-4xl font-semibold">Our Story</h1>
+						<p class="mt-6 text-sm leading-7 text-zinc-600">
+							Launched in 2015, Exclusive is South Asia’s premier online shopping marketplace with an active presence in Bangladesh.
+							Supported by wide range of tailored marketing, data and service solutions, Exclusive has 10,500 sellers and 300 brands and serves 3 million customers across the region.
+						</p>
+						<p class="mt-4 text-sm leading-7 text-zinc-600">
+							Exclusive has more than 1 Million products to offer, growing at a very fast pace. Exclusive offers a diverse assortment in categories ranging from consumer.
+						</p>
+					</div>
+					<div class="relative overflow-hidden rounded bg-zinc-100">
+						<img
+							src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1400&q=60"
+							alt="About"
+							class="h-72 w-full object-cover md:h-96"
+							loading="lazy"
+						/>
+						<div class="pointer-events-none absolute inset-0 ring-2 ring-red-200" />
+					</div>
+				</div>
+
+				<div class="mt-14 grid grid-cols-1 gap-4 md:grid-cols-4">
+					{stats.map((s) => (
+						<StatCard icon={s.icon} value={s.value} label={s.label} active={"active" in s ? s.active : false} />
+					))}
+				</div>
+
+				<div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
+					{team.map((m, idx) => (
+						<article class="overflow-hidden rounded bg-white">
+							<div class="aspect-[4/3] bg-zinc-100">
+								<img
+									src={
+										idx === 0
+											? "https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=900&q=60"
+											: idx === 1
+												? "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=60"
+												: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=900&q=60"
+									}
+									alt={m.name}
+									class="h-full w-full object-cover"
+									loading="lazy"
+								/>
+							</div>
+							<div class="p-4">
+								<p class="text-lg font-semibold">{m.name}</p>
+								<p class="mt-1 text-sm text-zinc-500">{m.role}</p>
+								<div class="mt-4 flex items-center gap-4 text-zinc-500">
+									<a href="#" aria-label="Twitter" class="hover:text-zinc-900">
+										<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M20 7.7c.01.2.01.4.01.6 0 6.1-4.6 10.4-10.4 10.4-2.1 0-4-.6-5.6-1.6h.8c1.7 0 3.3-.6 4.5-1.6-1.6 0-2.9-1.1-3.4-2.6.2 0 .4.1.7.1.3 0 .6 0 .9-.1-1.7-.3-3-1.8-3-3.6v-.1c.5.3 1.1.5 1.7.5-1-.7-1.6-1.8-1.6-3.1 0-.7.2-1.4.6-1.9 1.8 2.2 4.5 3.6 7.5 3.8-.1-.3-.1-.6-.1-1 0-2.1 1.7-3.8 3.8-3.8 1.1 0 2 .4 2.7 1.1.8-.2 1.6-.5 2.3-.9-.3.8-.9 1.4-1.7 1.8.7-.1 1.4-.3 2-.6-.5.7-1 1.3-1.7 1.8Z"/></svg>
+									</a>
+									<a href="#" aria-label="Instagram" class="hover:text-zinc-900">
+										<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.5"/><path d="M17 7h.01"/></svg>
+									</a>
+									<a href="#" aria-label="LinkedIn" class="hover:text-zinc-900">
+										<svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M6.5 6.5A1.5 1.5 0 1 1 6.5 3a1.5 1.5 0 0 1 0 3.5ZM5 21V9h3v12H5Zm6 0V9h3v1.7c.6-1.1 1.8-2 3.6-2 2.5 0 4.4 1.6 4.4 5V21h-3v-6.2c0-1.7-.6-2.8-2.2-2.8-1.2 0-2 .8-2.3 1.6-.1.3-.1.8-.1 1.2V21h-3Z"/></svg>
+									</a>
+								</div>
+							</div>
+						</article>
+					))}
+				</div>
+
+				<div class="mt-16">
+					<div class="grid grid-cols-1 gap-10 md:grid-cols-3">
+						<div class="text-center">
+							<div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-zinc-200">
+								<div class="grid h-12 w-12 place-items-center rounded-full bg-black text-white">
+									<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h13l3 5v5h-2"/><path d="M3 7v10h10"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+								</div>
+							</div>
+							<p class="mt-4 text-sm font-semibold">FREE AND FAST DELIVERY</p>
+							<p class="mt-1 text-xs text-zinc-500">Free delivery for all orders over $140</p>
+						</div>
+						<div class="text-center">
+							<div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-zinc-200">
+								<div class="grid h-12 w-12 place-items-center rounded-full bg-black text-white">
+									<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12a8 8 0 1 1 16 0"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M8 19h8"/><path d="M12 15v4"/></svg>
+								</div>
+							</div>
+							<p class="mt-4 text-sm font-semibold">24/7 CUSTOMER SERVICE</p>
+							<p class="mt-1 text-xs text-zinc-500">Friendly 24/7 customer support</p>
+						</div>
+						<div class="text-center">
+							<div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-zinc-200">
+								<div class="grid h-12 w-12 place-items-center rounded-full bg-black text-white">
+									<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6l8-4Z"/><path d="M9 12l2 2 4-5"/></svg>
+								</div>
+							</div>
+							<p class="mt-4 text-sm font-semibold">MONEY BACK GUARANTEE</p>
+							<p class="mt-1 text-xs text-zinc-500">We return money within 30 days</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

@@ -1,0 +1,17 @@
+---
+const { rightText = "English" } = Astro.props;
+---
+
+<div class="bg-black text-white">
+	<div class="mx-auto grid max-w-6xl grid-cols-3 items-center px-4 py-2 text-xs">
+		<div></div>
+		<p class="text-center text-white/90">
+			Summer Sale For All Stationery Items And Free Express Delivery — OFF 50%!
+			<a class="ml-2 font-semibold underline underline-offset-2" href="/products">ShopNow</a>
+		</p>
+		<div class="hidden items-center justify-end gap-2 md:flex">
+			<span class="text-white/80">{rightText}</span>
+			<span class="text-white/60">▾</span>
+		</div>
+	</div>
+</div>

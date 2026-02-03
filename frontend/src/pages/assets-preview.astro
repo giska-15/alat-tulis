@@ -1,0 +1,61 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+import genericDownload from "../../assets/download.png?url";
+import at1 from "../../assets/download (1).png?url";
+import at2 from "../../assets/download (2).png?url";
+import at3 from "../../assets/download (3).png?url";
+import at4 from "../../assets/download (4).png?url";
+import at5 from "../../assets/download (5).png?url";
+import at6 from "../../assets/download (6).png?url";
+import at7 from "../../assets/download (7).png?url";
+import at8 from "../../assets/download (8).png?url";
+import at9 from "../../assets/download (9).png?url";
+import at10 from "../../assets/download (10).png?url";
+import at11 from "../../assets/download (11).png?url";
+import at12 from "../../assets/download (12).png?url";
+
+const items = [
+	{ label: "download.png", url: genericDownload },
+	{ label: "download (1).png", url: at1 },
+	{ label: "download (2).png", url: at2 },
+	{ label: "download (3).png", url: at3 },
+	{ label: "download (4).png", url: at4 },
+	{ label: "download (5).png", url: at5 },
+	{ label: "download (6).png", url: at6 },
+	{ label: "download (7).png", url: at7 },
+	{ label: "download (8).png", url: at8 },
+	{ label: "download (9).png", url: at9 },
+	{ label: "download (10).png", url: at10 },
+	{ label: "download (11).png", url: at11 },
+	{ label: "download (12).png", url: at12 },
+];
+---
+
+<Layout title="Assets Preview | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" />
+
+		<main class="mx-auto max-w-6xl px-4 py-10">
+			<h1 class="text-2xl font-semibold">Assets Preview</h1>
+			<p class="mt-2 text-sm text-zinc-600">Buka halaman ini untuk pilih gambar yang cocok untuk produk tertentu (Map Plastik, Penggaris, dll).</p>
+
+			<div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+				{items.map((it) => (
+					<div class="rounded border border-zinc-200 bg-white p-3">
+						<div class="aspect-square overflow-hidden rounded bg-zinc-50 ring-1 ring-zinc-100">
+							<img src={it.url} alt={it.label} class="h-full w-full object-contain" loading="lazy" />
+						</div>
+						<p class="mt-2 text-xs text-zinc-600">{it.label}</p>
+					</div>
+				))}
+			</div>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

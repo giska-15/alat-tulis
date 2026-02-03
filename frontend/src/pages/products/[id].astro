@@ -1,0 +1,220 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteTopBar from "../../components/SiteTopBar.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { fetchHome, fetchProducts, formatRupiah } from "../../lib/api";
+import { fallbackProductImage, imgOnErrorTo } from "../../lib/image";
+import type { HomePayload, Product } from "../../lib/api";
+
+export async function getStaticPaths() {
+	const ids = new Set<number>();
+
+	// Prefer /api/public/home because it returns demo data when DB is unavailable.
+	const home = await fetchHome().catch(() => null);
+	if (home) {
+		for (const p of [...home.explore, ...home.bestSelling, ...home.newArrival]) {
+			const n = Number((p as any)?.id);
+			if (Number.isFinite(n) && n > 0) ids.add(n);
+		}
+	}
+
+	// If DB is available, expand from /api/products.
+	if (ids.size === 0) {
+		const products = await fetchProducts({ limit: 200 }).catch(() => []);
+		for (const p of products) {
+			const n = Number((p as any)?.id);
+			if (Number.isFinite(n) && n > 0) ids.add(n);
+		}
+	}
+
+	// Final fallback: ensure common dev IDs don't 404.
+	if (ids.size === 0) {
+		for (let i = 1; i <= 50; i += 1) ids.add(i);
+	}
+
+	return Array.from(ids).map((id) => ({ params: { id: String(id) } }));
+}
+
+const emptyHome: HomePayload = {
+	categories: [],
+	bestSelling: [],
+	explore: [],
+	newArrival: [],
+	themeCategoryId: "AT",
+};
+
+const data: HomePayload = await fetchHome().catch(() => emptyHome);
+const id = Number(Astro.params.id);
+const all = [...data.explore, ...data.bestSelling, ...data.newArrival];
+const product: Product | null = Number.isFinite(id) ? (all.find((p) => p.id === id) ?? null) : null;
+const related = data.bestSelling.slice(0, 4);
+---
+
+<Layout title={(product ? `${product.name} | Exclusive` : "Product | Exclusive")}>
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs
+					items={[
+						{ label: "Home", href: "/" },
+						{ label: "Products", href: "/products" },
+						{ label: product?.name ?? "Product" },
+					]}
+				/>
+
+				{!product ? (
+					<div class="mt-10 rounded bg-white p-8 ring-1 ring-zinc-200">
+						<h1 class="text-2xl font-semibold">Produk tidak ditemukan</h1>
+						<p class="mt-2 text-sm text-zinc-600">Silakan kembali ke halaman produk dan pilih item lain.</p>
+						<a href="/products" class="mt-6 inline-flex rounded bg-red-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-600">Lihat Produk</a>
+					</div>
+				) : (
+					<>
+						<div class="mt-10 grid grid-cols-1 gap-10 md:grid-cols-12">
+							<div class="md:col-span-7">
+								<div class="grid grid-cols-12 gap-4">
+									<div class="col-span-3 space-y-4">
+										{[0, 1, 2, 3].map((i) => (
+											<div class="aspect-square overflow-hidden rounded bg-zinc-50 ring-1 ring-zinc-100">
+												<img
+													src={product?.imageUrl || fallbackProductImage(product?.id, product?.name, product?.category?.id)}
+													alt={(product?.name ?? "Product") + " thumbnail " + String(i + 1)}
+													class="h-full w-full object-cover"
+													loading="lazy"
+													decoding="async"
+													onerror={imgOnErrorTo(fallbackProductImage(product?.id, product?.name, product?.category?.id))}
+												/>
+											</div>
+										))}
+									</div>
+									<div class="col-span-9 overflow-hidden rounded bg-zinc-50 ring-1 ring-zinc-100">
+										<div class="aspect-[4/3] bg-white">
+											<img
+												src={product?.imageUrl || fallbackProductImage(product?.id, product?.name, product?.category?.id)}
+												alt={product?.name ?? "Product"}
+												data-product-image="main"
+												data-product-image-id={String(product?.id ?? "")}
+												class="h-full w-full object-contain"
+												loading="lazy"
+												decoding="async"
+												onerror={imgOnErrorTo(fallbackProductImage(product?.id, product?.name, product?.category?.id))}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div
+						class="md:col-span-5"
+						data-product={
+							JSON.stringify(
+								product
+									? {
+											id: product.id,
+											name: product.name,
+											slug: product.slug,
+											price: product.price,
+											stock: product.stock,
+											imageUrl: product.imageUrl || fallbackProductImage(product.id, product.name, product.category?.id),
+											category: product.category,
+										}
+									: {
+											id: 0,
+											name: "Product",
+											slug: "product",
+											price: 0,
+											stock: null,
+											imageUrl: "",
+										}
+							)
+						}
+					>
+						<h1 class="text-2xl font-semibold">{product?.name ?? "Product"}</h1>
+						<div class="mt-2 flex items-center gap-3 text-sm">
+							<span class="text-amber-400">★★★★☆</span>
+							<span class="text-zinc-500">(150 Reviews)</span>
+							<span class="text-zinc-300">|</span>
+							<span class="text-green-600">In Stock</span>
+						</div>
+
+						<p class="mt-4 text-2xl font-semibold">{product ? formatRupiah(product.price) : "Rp 0"}</p>
+						<p class="mt-4 text-sm leading-6 text-zinc-600">
+							PlayStation 5 Controller Skin High quality vinyl with air channel adhesive for easy bubble free install & mess free removal.
+						</p>
+
+						<div class="mt-6 flex items-center gap-3" data-qty-root>
+							<div class="inline-flex h-11 items-center rounded border border-zinc-300">
+								<button type="button" class="h-11 w-11 text-lg text-zinc-600 hover:text-zinc-900" data-qty-dec>-</button>
+								<span class="w-12 text-center text-sm font-semibold" data-qty-value>1</span>
+								<button type="button" class="h-11 w-11 bg-red-500 text-lg text-white hover:bg-red-600" data-qty-inc>+</button>
+							</div>
+							<button type="button" class="h-11 rounded bg-red-500 px-8 text-sm font-semibold text-white hover:bg-red-600" data-action="buy-now" data-qty="1">Buy Now</button>
+							<button type="button" class="grid h-11 w-11 place-items-center rounded border border-zinc-300 hover:bg-zinc-50" aria-label="Wishlist" data-action="toggle-wishlist" data-wishlist-state={String(product?.id ?? 0)}>
+								<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+							</button>
+						</div>
+
+						<div class="mt-8 rounded border border-zinc-200">
+							<div class="flex items-center gap-4 border-b border-zinc-200 p-5">
+								<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h13l3 5v5h-2"/><path d="M3 7v10h10"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+								<div>
+									<p class="text-sm font-semibold">Free Delivery</p>
+									<p class="mt-1 text-xs text-zinc-500">Enter your postal code for Delivery Availability</p>
+								</div>
+							</div>
+							<div class="flex items-center gap-4 p-5">
+								<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 6v6l4 2"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+								<div>
+									<p class="text-sm font-semibold">Return Delivery</p>
+									<p class="mt-1 text-xs text-zinc-500">Free 30 Days Delivery Returns. Details</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+						<div class="mt-14">
+							<div class="flex items-center gap-2">
+								<span class="inline-block h-6 w-3 rounded bg-red-500"></span>
+								<p class="text-xs font-semibold text-red-500">Related Item</p>
+							</div>
+							<div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+								{related.map((p) => (
+									<ProductCard product={p} />
+								))}
+							</div>
+						</div>
+					</>
+				)}
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script type="module">
+			const root = document.querySelector('[data-qty-root]');
+			const dec = root?.querySelector('[data-qty-dec]');
+			const inc = root?.querySelector('[data-qty-inc]');
+			const val = root?.querySelector('[data-qty-value]');
+			const buy = document.querySelector('button[data-action="buy-now"]');
+			if (!(dec instanceof HTMLButtonElement) || !(inc instanceof HTMLButtonElement) || !(val instanceof HTMLElement) || !(buy instanceof HTMLButtonElement)) {
+				// no-op
+			} else {
+				let qty = 1;
+				const sync = () => {
+					val.textContent = String(qty);
+					buy.dataset.qty = String(qty);
+				};
+				dec.addEventListener('click', () => { qty = Math.max(1, qty - 1); sync(); });
+				inc.addEventListener('click', () => { qty = Math.max(1, qty + 1); sync(); });
+				sync();
+			}
+		</script>
+	</div>
+</Layout>

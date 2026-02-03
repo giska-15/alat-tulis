@@ -1,0 +1,139 @@
+---
+import "../styles/global.css";
+
+type NavKey = "dashboard" | "sales" | "products" | "customers" | "categories";
+
+const {
+	title = "Admin",
+	active = "dashboard",
+} = Astro.props as { title?: string; active?: NavKey };
+
+// If PUBLIC_API_BASE is not provided, resolve API base at runtime from the current host.
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "";
+
+const linkBase = "group flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition";
+const linkActive = "bg-white text-zinc-900";
+const linkIdle = "text-zinc-300 hover:bg-white/10 hover:text-white";
+const isActive = (key: NavKey) => (active === key ? linkActive : linkIdle);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{title}</title>
+	</head>
+	<body class="bg-zinc-100 text-zinc-900 antialiased">
+		<div class="min-h-dvh bg-zinc-100 md:flex">
+			<aside class="w-full bg-black text-white md:w-64">
+				<div class="flex items-center gap-3 px-5 pb-4 pt-6">
+					<div class="h-9 w-9 rounded-full bg-white/15"></div>
+					<div class="leading-tight">
+						<p id="sidebar-cashier" class="text-xs text-zinc-300">Nama kasir</p>
+						<a href="/admin" class="text-sm font-semibold">Admin Panel</a>
+					</div>
+				</div>
+
+				<nav class="px-3">
+					<a class={`${linkBase} ${isActive("dashboard")}`} href="/admin">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M3 13h8V3H3v10z" />
+							<path d="M13 21h8V11h-8v10z" />
+							<path d="M13 3h8v6h-8V3z" />
+							<path d="M3 17h8v4H3v-4z" />
+						</svg>
+						Dashboard
+					</a>
+					<a class={`${linkBase} ${isActive("sales")}`} href="/admin/transaksi">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+						Transaksi
+					</a>
+					<a class={`${linkBase} ${isActive("products")}`} href="/admin/produk">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+							<path d="M3.3 7l8.7 5 8.7-5" />
+							<path d="M12 22V12" />
+						</svg>
+						Produk
+					</a>
+					<a class={`${linkBase} ${isActive("customers")}`} href="/admin/customers">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+							<circle cx="12" cy="7" r="4" />
+						</svg>
+						Customers
+					</a>
+					<a class={`${linkBase} ${isActive("categories")}`} href="/admin/categories">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 7h-9" />
+							<path d="M14 17H5" />
+							<circle cx="17" cy="17" r="3" />
+							<circle cx="7" cy="7" r="3" />
+						</svg>
+						Categories
+					</a>
+				</nav>
+
+				<div class="mt-auto px-3 pb-6 pt-6">
+					<a class={`${linkBase} ${linkIdle}`} href="/logout">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+							<path d="M16 17l5-5-5-5" />
+							<path d="M21 12H9" />
+						</svg>
+						Keluar
+					</a>
+				</div>
+			</aside>
+
+			<main class="flex-1 bg-white">
+				<div class="mx-auto max-w-[980px] px-8 py-7">
+					<slot />
+				</div>
+			</main>
+		</div>
+
+	<script is:inline define:vars={{ apiBase }}>
+		(() => {
+			const API_BASE = (apiBase || "").replace(/\/$/, "");
+			window.__API_BASE = API_BASE;
+			const el = document.getElementById("sidebar-cashier");
+			if (!el) return;
+
+			const cashierId = localStorage.getItem("cashierId") || "12345678";
+
+			const tryById = async (id) => {
+				const res = await fetch(`${API_BASE}/api/cashiers/${id}`, { headers: { Accept: "application/json" } });
+				if (!res.ok) throw new Error("not found");
+				const json = await res.json();
+				return json?.data;
+			};
+
+			const tryFirst = async () => {
+				const res = await fetch(`${API_BASE}/api/cashiers`, { headers: { Accept: "application/json" } });
+				if (!res.ok) throw new Error("no list");
+				const json = await res.json();
+				return Array.isArray(json?.data) ? json.data[0] : null;
+			};
+
+			(async () => {
+				try {
+					const c = await tryById(cashierId);
+					if (c?.username) el.textContent = c.username;
+				} catch {
+					try {
+						const c = await tryFirst();
+						if (c?.username) el.textContent = c.username;
+					} catch {
+						// keep fallback
+					}
+				}
+			})();
+		})();
+	</script>
+	</body>
+</html>

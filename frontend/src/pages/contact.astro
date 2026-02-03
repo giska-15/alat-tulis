@@ -1,0 +1,80 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+
+const contactInfo = [
+	{
+		title: "Call To Us",
+		lines: ["We are available 24/7, 7 days a week.", "Phone: +8801611112222"],
+		icon: "phone",
+	},
+	{
+		title: "Write To Us",
+		lines: ["Fill out our form and we will contact you within 24 hours.", "Emails: customer@exclusive.com", "Emails: support@exclusive.com"],
+		icon: "mail",
+	},
+] as const;
+---
+
+<Layout title="Contact | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="contact" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Contact" }]} />
+
+				<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-12">
+					<aside class="md:col-span-4">
+						<div class="rounded bg-white p-6 ring-1 ring-zinc-200">
+							{contactInfo.map((c, idx) => (
+								<div class={idx === 0 ? "" : "mt-8 border-t border-zinc-100 pt-8"}>
+									<div class="flex items-center gap-3">
+										<div class="grid h-10 w-10 place-items-center rounded-full bg-red-500 text-white">
+											{c.icon === "phone" ? (
+												<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+												<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1A19.5 19.5 0 0 1 5.2 12.8 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1l-1.3 1.3a16 16 0 0 0 6.9 6.9l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6A2 2 0 0 1 22 16.9Z" />
+											</svg>
+										) : (
+											<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+												<path d="M4 4h16v16H4z" />
+												<path d="m4 7 8 6 8-6" />
+											</svg>
+										)}
+									</div>
+										<p class="text-sm font-semibold">{c.title}</p>
+									</div>
+									<div class="mt-4 space-y-2 text-sm text-zinc-600">
+										{c.lines.map((t) => (
+											<p>{t}</p>
+										))}
+									</div>
+								</div>
+							))}
+						</div>
+					</aside>
+
+					<div class="md:col-span-8">
+						<form class="rounded bg-white p-6 ring-1 ring-zinc-200">
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+								<input class="h-12 rounded bg-zinc-50 px-4 text-sm outline-none ring-1 ring-transparent focus:ring-zinc-300" placeholder="Your Name *" />
+								<input class="h-12 rounded bg-zinc-50 px-4 text-sm outline-none ring-1 ring-transparent focus:ring-zinc-300" placeholder="Your Email *" />
+								<input class="h-12 rounded bg-zinc-50 px-4 text-sm outline-none ring-1 ring-transparent focus:ring-zinc-300" placeholder="Your Phone *" />
+							</div>
+							<textarea class="mt-4 min-h-[180px] w-full rounded bg-zinc-50 px-4 py-3 text-sm outline-none ring-1 ring-transparent focus:ring-zinc-300" placeholder="Your Message" />
+							<div class="mt-6 flex justify-end">
+								<button type="button" class="rounded bg-red-500 px-8 py-3 text-sm font-semibold text-white hover:bg-red-600">Send Message</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

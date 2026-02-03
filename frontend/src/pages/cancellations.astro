@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+
+<Layout title="My Cancellations | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "My Cancellations" }]} />
+				<div class="mt-10 rounded bg-white p-6 ring-1 ring-zinc-200">
+					<h1 class="text-xl font-semibold">Pembatalan</h1>
+					<p class="mt-2 text-sm text-zinc-600">Daftar pesanan yang dibatalkan akan tampil di sini.</p>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

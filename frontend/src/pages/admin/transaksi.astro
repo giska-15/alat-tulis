@@ -1,0 +1,302 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Transaksi" active="sales">
+	<div class="flex items-center justify-between">
+		<h1 class="text-lg font-semibold">Daftar Transaksi</h1>
+		<div class="flex items-center gap-3">
+			<div class="rounded-xl border border-zinc-200 bg-white px-4 py-2">
+				<p class="text-[10px] text-zinc-500">Total transaksi</p>
+				<div class="mt-0.5 flex items-center gap-2">
+					<div class="grid h-7 w-7 place-items-center rounded-full bg-red-50 text-red-600">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M9 11l3 3L22 4" />
+							<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+						</svg>
+					</div>
+					<p id="stat-count" class="text-base font-semibold leading-none">-</p>
+				</div>
+			</div>
+			<div class="rounded-xl border border-zinc-200 bg-white px-4 py-2">
+				<p class="text-[10px] text-zinc-500">Pendapatan</p>
+				<div class="mt-0.5 flex items-center gap-2">
+					<div class="grid h-7 w-7 place-items-center rounded-full bg-red-50 text-red-600">
+						<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 1v22" />
+							<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
+						</svg>
+					</div>
+					<p id="stat-revenue" class="text-base font-semibold leading-none">-</p>
+				</div>
+			</div>
+			<button id="btn-add" class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold hover:bg-zinc-50">
+				<span class="grid h-7 w-7 place-items-center rounded-full bg-red-50 text-red-600">
+					<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 5v14" />
+						<path d="M5 12h14" />
+					</svg>
+				</span>
+				Tambah Transaksi
+			</button>
+		</div>
+	</div>
+
+	<div class="mt-4 overflow-x-auto">
+		<table class="min-w-full text-xs">
+				<thead>
+					<tr class="bg-zinc-100 text-left text-[10px] uppercase tracking-wide text-zinc-500">
+						<th class="rounded-l-xl px-4 py-3">ID Order</th>
+						<th class="px-4 py-3">Tanggal</th>
+						<th class="px-4 py-3">Pelanggan</th>
+						<th class="px-4 py-3">Total</th>
+						<th class="px-4 py-3">Metode Pembayaran</th>
+						<th class="rounded-r-xl px-4 py-3 text-right"></th>
+					</tr>
+				</thead>
+				<tbody id="body"></tbody>
+		</table>
+		<p id="empty" class="mt-4 hidden text-sm text-zinc-500">Belum ada transaksi.</p>
+		<p id="error" class="mt-4 hidden text-sm text-red-600"></p>
+	</div>
+
+	<dialog id="dlg" class="w-full max-w-3xl rounded-2xl p-0">
+		<form method="dialog" class="rounded-2xl bg-white">
+			<div class="border-b border-zinc-200 px-5 py-4">
+				<p class="text-sm font-semibold">Tambah Transaksi</p>
+				<p class="text-xs text-zinc-500">Minimal 1 item.</p>
+			</div>
+			<div class="grid gap-3 px-5 py-4 sm:grid-cols-2">
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Customer ID (opsional)</span>
+					<input name="customerId" maxlength="8" class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" placeholder="contoh: 12345678" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Method ID (opsional)</span>
+					<input name="methodId" maxlength="1" class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" placeholder="1" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Receipt Number (opsional)</span>
+					<input name="receiptNumber" class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+				<label class="text-sm">
+					<span class="text-xs text-zinc-600">Order Date (opsional)</span>
+					<input name="orderDate" type="datetime-local" class="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</label>
+			</div>
+
+			<div class="px-5 pb-4">
+				<div class="flex items-center justify-between">
+					<p class="text-sm font-semibold">Items</p>
+					<button id="btn-add-item" type="button" class="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs hover:bg-zinc-50">Tambah Item</button>
+				</div>
+				<div class="mt-3 overflow-x-auto">
+					<table class="min-w-full border-separate border-spacing-0">
+						<thead>
+							<tr class="text-left text-xs text-zinc-500">
+								<th class="border-b border-zinc-200 py-2 pr-4">Produk</th>
+								<th class="border-b border-zinc-200 py-2 pr-4">Qty</th>
+								<th class="border-b border-zinc-200 py-2 pr-4">Harga</th>
+								<th class="border-b border-zinc-200 py-2 pr-0 text-right">Aksi</th>
+							</tr>
+						</thead>
+						<tbody id="items"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<p id="form-error" class="px-5 pb-2 text-sm text-red-600"></p>
+			<div class="flex items-center justify-end gap-2 border-t border-zinc-200 px-5 py-4">
+				<button type="button" data-cancel class="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50">Batal</button>
+				<button type="submit" class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800">Simpan</button>
+			</div>
+		</form>
+	</dialog>
+
+	<script type="module">
+		import { fetchSales, deleteSale, createSale, fetchProducts, formatRupiah } from "/admin-api.js";
+
+		const tbody = document.getElementById("body");
+		const emptyEl = document.getElementById("empty");
+		const errEl = document.getElementById("error");
+		const dlg = document.getElementById("dlg");
+		const itemsTbody = document.getElementById("items");
+		const formErr = document.getElementById("form-error");
+		let products = [];
+		const statCount = document.getElementById("stat-count");
+		const statRevenue = document.getElementById("stat-revenue");
+		const ICON_TRASH = `
+			<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M3 6h18" />
+				<path d="M8 6V4h8v2" />
+				<path d="M19 6l-1 14H6L5 6" />
+				<path d="M10 11v6" />
+				<path d="M14 11v6" />
+			</svg>
+		`;
+
+		function showError(message) {
+			errEl.textContent = message;
+			errEl.classList.remove("hidden");
+		}
+		function clearError() {
+			errEl.textContent = "";
+			errEl.classList.add("hidden");
+		}
+
+		function closestFromEvent(e, selector) {
+			const t = e?.target;
+			const el = t && t.nodeType === 3 ? t.parentElement : t;
+			return el && el.closest ? el.closest(selector) : null;
+		}
+
+		function renderRows(rows) {
+			tbody.innerHTML = "";
+			statCount.textContent = String(rows.length);
+			const totalRevenue = rows.reduce((sum, s) => sum + Number(s.total || 0), 0);
+			statRevenue.textContent = formatRupiah(totalRevenue);
+			for (const s of rows) {
+				const customerLabel = s.customer?.name ? `${s.customer.name} (${s.customerId ?? ""})` : (s.customerId ?? "-");
+				const date = s.orderDate ? new Date(s.orderDate).toLocaleString("id-ID") : "-";
+				const method = s.method?.method ?? "-";
+				const tr = document.createElement("tr");
+				tr.innerHTML = `
+					<td class="border-b border-zinc-100 px-4 py-3 font-mono text-xs text-zinc-700">${s.id}</td>
+					<td class="border-b border-zinc-100 px-4 py-3">${date}</td>
+					<td class="border-b border-zinc-100 px-4 py-3">${customerLabel}</td>
+					<td class="border-b border-zinc-100 px-4 py-3">${formatRupiah(Number(s.total || 0))}</td>
+					<td class="border-b border-zinc-100 px-4 py-3">${method}</td>
+					<td class="border-b border-zinc-100 px-4 py-3 text-right">
+						<button title="Hapus" data-del="${s.id}" class="text-red-600 hover:text-red-700">${ICON_TRASH}</button>
+					</td>
+				`;
+				tbody.appendChild(tr);
+			}
+			emptyEl.classList.toggle("hidden", rows.length !== 0);
+		}
+
+		async function load() {
+			clearError();
+			try {
+				const rows = await fetchSales();
+				renderRows(rows);
+			} catch (e) {
+				showError(e?.message ?? String(e));
+			}
+		}
+
+		function createItemRow() {
+			const tr = document.createElement("tr");
+			const options = products
+				.map((p) => `<option value="${p.id}" data-price="${p.price}">${p.id} - ${p.name}</option>`)
+				.join("");
+			tr.innerHTML = `
+				<td class="border-b border-zinc-100 py-2 pr-4">
+					<select name="productId" class="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm">${options}</select>
+				</td>
+				<td class="border-b border-zinc-100 py-2 pr-4">
+					<input name="qty" type="number" min="1" step="1" value="1" class="w-24 rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</td>
+				<td class="border-b border-zinc-100 py-2 pr-4">
+					<input name="price" type="number" min="0" step="1" value="${products[0]?.price ?? 0}" class="w-40 rounded-lg border border-zinc-200 px-3 py-2 text-sm" />
+				</td>
+				<td class="border-b border-zinc-100 py-2 pr-0 text-right">
+					<button type="button" data-remove-item class="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs hover:bg-zinc-50">Hapus Item</button>
+				</td>
+			`;
+
+			tr.querySelector("select[name=productId]").addEventListener("change", (e) => {
+				const sel = e.currentTarget;
+				const opt = sel.selectedOptions?.[0];
+				const price = Number(opt?.getAttribute("data-price") ?? 0);
+				tr.querySelector("input[name=price]").value = String(price);
+			});
+			tr.querySelector("button[data-remove-item]").addEventListener("click", () => {
+				tr.remove();
+			});
+
+			itemsTbody.appendChild(tr);
+		}
+
+		document.getElementById("btn-add")?.addEventListener?.("click", async () => {
+			formErr.textContent = "";
+			itemsTbody.innerHTML = "";
+			if (products.length === 0) {
+				try {
+					products = await fetchProducts({ limit: 500 });
+				} catch (e) {
+					formErr.textContent = e?.message ?? String(e);
+				}
+			}
+			createItemRow();
+			dlg.showModal();
+		});
+
+		dlg.querySelector("[data-cancel]")?.addEventListener("click", () => {
+			formErr.textContent = "";
+			dlg.close("cancel");
+		});
+
+		document.getElementById("btn-add-item").addEventListener("click", () => createItemRow());
+
+		dlg.addEventListener("close", () => {
+			formErr.textContent = "";
+			const form = dlg.querySelector("form");
+			form?.reset();
+			itemsTbody.innerHTML = "";
+		});
+
+		dlg.querySelector("form").addEventListener("submit", async (e) => {
+			e.preventDefault();
+			formErr.textContent = "";
+			const fd = new FormData(e.currentTarget);
+			const customerId = String(fd.get("customerId") || "").trim();
+			const methodId = String(fd.get("methodId") || "").trim();
+			const receiptNumber = String(fd.get("receiptNumber") || "").trim();
+			const orderDate = String(fd.get("orderDate") || "").trim();
+
+			const items = [];
+			for (const row of Array.from(itemsTbody.querySelectorAll("tr"))) {
+				const productId = Number(row.querySelector("select[name=productId]")?.value);
+				const qty = Number(row.querySelector("input[name=qty]")?.value);
+				const price = Number(row.querySelector("input[name=price]")?.value);
+				if (!productId || !qty || qty < 1 || price < 0) continue;
+				items.push({ productId, qty, price });
+			}
+			if (items.length === 0) {
+				formErr.textContent = "Minimal 1 item yang valid.";
+				return;
+			}
+
+			try {
+				await createSale({
+					customerId: customerId || null,
+					methodId: methodId || null,
+					orderDate: orderDate || undefined,
+					items,
+					...(receiptNumber ? { receiptNumber } : {}),
+				});
+				dlg.close();
+				await load();
+			} catch (err) {
+				formErr.textContent = err?.message ?? String(err);
+			}
+		});
+
+		tbody.addEventListener("click", async (e) => {
+			const btn = closestFromEvent(e, "button[data-del]");
+			if (!btn) return;
+			const id = Number(btn.getAttribute("data-del"));
+			if (!id) return;
+			if (!confirm(`Hapus transaksi #${id}?`)) return;
+			try {
+				await deleteSale(id);
+				await load();
+			} catch (err) {
+				showError(err?.message ?? String(err));
+			}
+		});
+
+		load();
+	</script>
+</AdminLayout>

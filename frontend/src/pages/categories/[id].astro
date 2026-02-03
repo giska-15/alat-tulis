@@ -1,0 +1,111 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SiteTopBar from "../../components/SiteTopBar.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { fetchCategories, fetchCategory, fetchProducts } from "../../lib/api";
+
+export async function getStaticPaths() {
+	const categories = await fetchCategories().catch(() => []);
+	const fallbackIds = [
+		"AT",
+		"PL",
+		"PN",
+		"BK",
+		"SP",
+		"PH",
+		"PG",
+		"TX",
+		"ST",
+		"CT",
+		"GN",
+		"LM",
+		"PF",
+		"EN",
+		"KP",
+		"MR",
+		"HB",
+		"TR",
+		"LB",
+		"LK",
+		"CL",
+		"BD",
+		"NT",
+		"FB",
+		"KR",
+		"GL",
+		"PT",
+		"AR",
+		"WB",
+		"TP",
+	];
+	const ids = categories.length ? categories.map((c) => String(c.id)) : fallbackIds;
+	return ids.map((id) => ({ params: { id } }));
+}
+
+const { id } = Astro.params;
+
+let category: { id: string; name: string; slug: string } | null = null;
+let products: any[] = [];
+let notFound = false;
+
+try {
+	category = await fetchCategory(String(id));
+	products = await fetchProducts({ categoryId: String(id), limit: 24 });
+} catch {
+	notFound = true;
+}
+---
+
+<Layout title={notFound ? "Kategori Tidak Ditemukan | Exclusive" : `${category?.name} | Exclusive`}>
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs
+					items={[
+						{ label: "Home", href: "/" },
+						{ label: "Products", href: "/products" },
+						{ label: notFound ? "Kategori" : category?.name ?? "Kategori" },
+					]}
+				/>
+
+				{notFound ? (
+					<div class="mt-10 rounded bg-white p-8 ring-1 ring-zinc-200">
+						<h1 class="text-2xl font-semibold">Kategori tidak ditemukan</h1>
+						<p class="mt-2 text-sm text-zinc-600">Silakan kembali ke halaman produk.</p>
+						<a href="/products" class="mt-6 inline-flex rounded bg-red-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-600">Lihat Produk</a>
+					</div>
+				) : (
+					<div class="mt-10">
+						<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+							<div>
+								<h1 class="text-3xl font-semibold">{category?.name}</h1>
+								<p class="mt-1 text-sm text-zinc-600">Produk berdasarkan kategori.</p>
+							</div>
+							<a href="/products" class="text-sm font-semibold text-red-500 hover:underline">Lihat semua produk</a>
+						</div>
+
+						{products.length ? (
+							<div class="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+								{products.map((p) => (
+									<ProductCard product={p} />
+								))}
+							</div>
+						) : (
+							<div class="mt-8 rounded border border-zinc-200 bg-zinc-50 p-6 text-sm text-zinc-600">
+								Belum ada produk di kategori ini.
+							</div>
+						)}
+					</div>
+				)}
+			</section>
+		</main>
+
+		<SiteFooter />
+	</div>
+</Layout>

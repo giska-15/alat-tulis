@@ -1,0 +1,250 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { formatRupiah } from "../lib/api";
+---
+
+<Layout title="Checkout | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs
+					items={[
+						{ label: "Account", href: "/account" },
+						{ label: "My Account", href: "/account" },
+						{ label: "Product", href: "/products" },
+						{ label: "View Cart", href: "/cart" },
+						{ label: "Checkout" },
+					]}
+				/>
+
+				<div class="mt-10 grid grid-cols-1 gap-10 md:grid-cols-12">
+					<div class="md:col-span-7">
+						<h1 class="text-3xl font-semibold">Billing Details</h1>
+						<form class="mt-8 space-y-5">
+							<div>
+								<label class="text-xs text-zinc-500">First Name*</label>
+								<input name="firstName" class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Company Name</label>
+								<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Street Address*</label>
+								<input name="street" class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Apartment, floor, etc. (optional)</label>
+								<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Town/City*</label>
+								<input name="city" class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Phone Number*</label>
+								<input name="phone" class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<div>
+								<label class="text-xs text-zinc-500">Email Address*</label>
+								<input name="email" class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" />
+							</div>
+							<label class="flex items-center gap-3 pt-2 text-sm text-zinc-600">
+								<input type="checkbox" class="h-4 w-4 accent-red-500" checked />
+								Save this information for faster check-out next time
+							</label>
+						</form>
+					</div>
+
+					<div class="md:col-span-5">
+						<div class="rounded bg-white p-6 ring-1 ring-zinc-200">
+							<div class="space-y-4" data-checkout-items></div>
+							<p class="hidden rounded bg-zinc-50 p-4 text-center text-sm text-zinc-600" data-checkout-empty>
+								Cart kamu kosong. Silakan tambahkan produk terlebih dulu.
+							</p>
+
+							<div class="mt-6 space-y-4 text-sm">
+								<div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+									<span class="text-zinc-600">Subtotal</span>
+									<span class="font-semibold" data-checkout-subtotal>{formatRupiah(0)}</span>
+								</div>
+								<div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+									<span class="text-zinc-600">Shipping</span>
+									<span class="font-semibold" data-checkout-shipping>Free</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<span class="text-zinc-600">Total</span>
+									<span class="font-semibold" data-checkout-total>{formatRupiah(0)}</span>
+								</div>
+							</div>
+
+							<div class="mt-6 space-y-4 text-sm">
+								<label class="flex items-center justify-between">
+									<span class="flex items-center gap-3">
+										<input type="radio" name="pay" value="bank" class="h-4 w-4 accent-black" checked />
+										Transfer Bank
+									</span>
+									<span class="flex items-center gap-2 text-zinc-500">
+										<span class="h-3 w-6 rounded bg-red-500"></span>
+										<span class="h-3 w-6 rounded bg-amber-500"></span>
+										<span class="h-3 w-6 rounded bg-blue-500"></span>
+										<span class="h-3 w-6 rounded bg-zinc-900"></span>
+									</span>
+								</label>
+								<label class="flex items-center gap-3">
+									<input type="radio" name="pay" value="cod" class="h-4 w-4 accent-black" />
+									Tunai
+								</label>
+								<label class="flex items-center gap-3">
+									<input type="radio" name="pay" value="qris" class="h-4 w-4 accent-black" />
+									QRIS
+								</label>
+
+								<div class="hidden rounded border border-zinc-200 bg-zinc-50 p-4" data-qris-box>
+									<p class="text-sm font-semibold text-zinc-900">Scan QR untuk bayar</p>
+									<p class="mt-1 text-xs text-zinc-600">Gunakan aplikasi e-wallet / mobile banking yang mendukung QRIS.</p>
+									<div class="mt-3 grid place-items-center">
+										<img
+											src="/images/qris.png"
+											alt="QRIS"
+											class="w-56 max-w-full rounded bg-white p-2 ring-1 ring-zinc-200"
+											loading="lazy"
+											decoding="async"
+											onerror="this.onerror=null; this.src='/images/qris-placeholder.svg';"
+										/>
+									</div>
+									<p class="mt-3 text-[11px] text-zinc-500">Catatan: sistem akan selalu memakai <code>/images/qris.png</code> untuk QR. Jika file belum ada, akan tampil placeholder.</p>
+								</div>
+							</div>
+
+							<div class="mt-6 flex gap-4">
+								<input class="h-12 w-full rounded border border-zinc-300 px-4 text-sm outline-none" placeholder="Coupon Code" />
+								<button type="button" class="h-12 rounded bg-red-500 px-7 text-sm font-semibold text-white hover:bg-red-600">Apply Coupon</button>
+							</div>
+
+							<p class="mt-4 hidden rounded bg-zinc-50 p-3 text-xs text-zinc-700" data-checkout-status></p>
+							<button type="button" class="mt-3 w-full rounded bg-red-500 px-8 py-3 text-sm font-semibold text-white hover:bg-red-600" data-place-order>Place Order</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline>
+			const FIXED_CUSTOMERS = [
+				{ id: '24090060', name: 'Akbar Rizqi Ainul Yaqin', email: 'akbar.rizki@gmail.com', phone: '082313054691' },
+				{ id: '24090055', name: 'Giska Aura Muhamad Prasetyo', email: 'ktlbpkkaupch@gmail.com', phone: '0895323030369' },
+			];
+
+			const itemsRoot = document.querySelector('[data-checkout-items]');
+			const emptyEl = document.querySelector('[data-checkout-empty]');
+			const subtotalEl = document.querySelector('[data-checkout-subtotal]');
+			const shippingEl = document.querySelector('[data-checkout-shipping]');
+			const totalEl = document.querySelector('[data-checkout-total]');
+			const placeBtn = document.querySelector('[data-place-order]');
+			const statusEl = document.querySelector('[data-checkout-status]');
+			const qrisBox = document.querySelector('[data-qris-box]');
+			if (itemsRoot instanceof HTMLElement && emptyEl instanceof HTMLElement && subtotalEl instanceof HTMLElement && shippingEl instanceof HTMLElement && totalEl instanceof HTMLElement) {
+				const render = () => window.ExclusiveStore?.renderCheckoutSummary?.({ itemsRoot, emptyEl, subtotalEl, shippingEl, totalEl });
+				render();
+				window.addEventListener('store:cart', render);
+			}
+
+			const setStatus = (msg, kind = 'info') => {
+				if (!(statusEl instanceof HTMLElement)) return;
+				statusEl.textContent = msg;
+				statusEl.classList.remove('hidden');
+				statusEl.classList.toggle('bg-red-50', kind === 'error');
+				statusEl.classList.toggle('text-red-700', kind === 'error');
+				statusEl.classList.toggle('bg-zinc-50', kind !== 'error');
+				statusEl.classList.toggle('text-zinc-700', kind !== 'error');
+			};
+
+			function getSelectedCustomerId() {
+				const existing = localStorage.getItem('exclusive_customer_id');
+				if (existing && String(existing).trim().length === 8) {
+					const ex = String(existing).trim();
+					if (FIXED_CUSTOMERS.some((c) => c.id === ex)) return ex;
+				}
+
+				const emailInput = (document.querySelector('input[name="email"]')?.value || '').trim().toLowerCase();
+				const matched = FIXED_CUSTOMERS.find((c) => String(c.email).toLowerCase() === emailInput);
+				const chosen = matched?.id || FIXED_CUSTOMERS[0]?.id;
+				if (chosen) localStorage.setItem('exclusive_customer_id', chosen);
+				return chosen;
+			}
+
+			const updatePayUi = () => {
+				const pay = document.querySelector('input[name="pay"]:checked')?.getAttribute('value') || 'bank';
+				if (qrisBox instanceof HTMLElement) qrisBox.classList.toggle('hidden', pay !== 'qris');
+			};
+			document.querySelectorAll('input[name="pay"]').forEach((el) => el.addEventListener('change', updatePayUi));
+			updatePayUi();
+
+			if (placeBtn instanceof HTMLButtonElement) {
+				placeBtn.addEventListener('click', async () => {
+					try {
+						const lines = window.ExclusiveStore?.loadCart?.() || [];
+						if (!lines.length) {
+							setStatus('Cart kamu kosong. Silakan tambah produk dulu.', 'error');
+							return;
+						}
+
+						placeBtn.disabled = true;
+						const prevText = placeBtn.textContent;
+						placeBtn.textContent = 'Processing...';
+
+						const pay = document.querySelector('input[name="pay"]:checked')?.getAttribute('value') || 'bank';
+						const methodId = pay === 'cod' ? '1' : pay === 'qris' ? '3' : '2';
+						const bankTrans = pay === 'bank'
+							? `BCA-${String(Date.now()).slice(-10)}`.slice(0, 25)
+							: pay === 'qris'
+								? `QRIS-${String(Date.now()).slice(-10)}`.slice(0, 25)
+								: null;
+						const cashierId = localStorage.getItem('cashierId') || '12345678';
+						const customerId = getSelectedCustomerId();
+						const invoiceNumber = `INV${String(Date.now()).slice(-10)}${String(Math.floor(Math.random() * 900) + 100)}`.slice(0, 20);
+						const trackingNumber = `RESI${String(Date.now()).slice(-8)}${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
+						const data = await window.ExclusiveStore?.placeOrder?.({ cashierId, methodId, bankTrans, customerId, receiptNumber: invoiceNumber, trackingNumber });
+						const orderId = data?.id ?? null;
+						const payload = {
+							orderId,
+							invoiceNumber,
+							trackingNumber,
+							total: data?.total ?? null,
+							createdAt: data?.orderDate ?? new Date().toISOString(),
+							methodLabel: pay === 'cod' ? 'Tunai' : pay === 'qris' ? 'QRIS' : 'Transfer',
+						};
+						try {
+							sessionStorage.setItem('exclusive_last_order', JSON.stringify(payload));
+							localStorage.setItem('exclusive_last_order', JSON.stringify(payload));
+						} catch {}
+						setStatus('Order berhasil dibuat. Mengalihkan ke halaman pesanan berhasil...');
+						setTimeout(() => {
+							window.location.href = orderId != null ? `/order-success?orderId=${encodeURIComponent(String(orderId))}` : '/order-success';
+						}, 600);
+
+						placeBtn.textContent = prevText;
+						placeBtn.disabled = false;
+					} catch (e) {
+						setStatus(e?.message || 'Gagal checkout. Coba lagi.', 'error');
+						if (placeBtn instanceof HTMLButtonElement) {
+							placeBtn.disabled = false;
+							placeBtn.textContent = 'Place Order';
+						}
+					}
+				});
+			}
+		</script>
+	</div>
+</Layout>

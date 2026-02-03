@@ -1,0 +1,19 @@
+---
+type Item = { label: string; href?: string };
+const { items } = Astro.props as { items: Item[] };
+---
+
+<nav aria-label="Breadcrumb" class="text-xs text-zinc-500">
+	<ol class="flex flex-wrap items-center gap-2">
+		{items.map((it, idx) => (
+			<li class="flex items-center gap-2">
+				{idx === 0 ? null : <span class="text-zinc-300">/</span>}
+				{it.href ? (
+					<a class="hover:text-zinc-700" href={it.href}>{it.label}</a>
+				) : (
+					<span class="text-zinc-700">{it.label}</span>
+				)}
+			</li>
+		))}
+	</ol>
+</nav>

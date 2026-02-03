@@ -1,0 +1,132 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+
+const menu = [
+	{ group: "Manage My Account", items: ["My Profile", "Address Book", "My Payment Options"], active: "My Profile" },
+	{ group: "My Orders", items: ["My Returns", "My Cancellations"] },
+	{ group: "My Wishlist", items: ["Wishlist"] },
+] as const;
+---
+
+<Layout title="My Account | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "My Account" }]} />
+
+				<div class="mt-10 flex items-center justify-between">
+					<h1 class="text-2xl font-semibold">My Account</h1>
+					<p class="text-sm text-zinc-600" data-auth-welcome>Welcome! <span class="font-semibold text-red-500">Mirza</span></p>
+				</div>
+
+				<div class="mt-8 grid grid-cols-1 gap-8 md:grid-cols-12">
+					<aside class="md:col-span-4">
+						{menu.map((g) => (
+							<div class="mb-8">
+								<p class="text-sm font-semibold">{g.group}</p>
+								<ul class="mt-3 space-y-2 text-sm text-zinc-500">
+									{g.items.map((it) => (
+										<li>
+											<a
+												href="#"
+												class={
+													"hover:text-zinc-900 " +
+													("active" in g && g.active === it ? "text-red-500" : "")
+												}
+											>
+												{it}
+											</a>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</aside>
+
+					<div class="md:col-span-8">
+						<div class="rounded bg-white p-6 ring-1 ring-zinc-200">
+							<h2 class="text-lg font-semibold text-red-500">Edit Your Profile</h2>
+
+							<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+								<div>
+									<label class="text-xs text-zinc-500">First Name</label>
+									<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" value="Mirza" data-auth-first />
+								</div>
+								<div>
+									<label class="text-xs text-zinc-500">Last Name</label>
+									<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" value="Kamal" data-auth-last />
+								</div>
+								<div>
+									<label class="text-xs text-zinc-500">Email</label>
+									<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" value="mirza@exclusive.com" data-auth-email />
+								</div>
+								<div>
+									<label class="text-xs text-zinc-500">Address</label>
+									<input class="mt-2 h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" value="Ujungberung 232A, United States" />
+								</div>
+							</div>
+
+							<div class="mt-6 hidden rounded bg-zinc-50 p-4 text-sm text-zinc-700 ring-1 ring-zinc-200" data-auth-required>
+								Kamu belum login. Silakan <a href="/login" class="font-semibold text-red-500 hover:underline">login</a> dulu.
+							</div>
+
+							<div class="mt-8">
+								<p class="text-sm font-semibold">Password Changes</p>
+								<div class="mt-4 space-y-4">
+									<input class="h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" placeholder="Current Password" />
+									<input class="h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" placeholder="New Password" />
+									<input class="h-12 w-full rounded bg-zinc-50 px-4 text-sm outline-none" placeholder="Confirm New Password" />
+								</div>
+							</div>
+
+							<div class="mt-10 flex items-center justify-end gap-6">
+								<button type="button" class="text-sm font-semibold text-zinc-700 hover:text-zinc-900">Cancel</button>
+								<button type="button" class="rounded bg-red-500 px-8 py-3 text-sm font-semibold text-white hover:bg-red-600">Save Changes</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline define:vars={{ apiBase }}>
+			(() => {
+				const welcome = document.querySelector('[data-auth-welcome]');
+				const first = document.querySelector('[data-auth-first]');
+				const last = document.querySelector('[data-auth-last]');
+				const email = document.querySelector('[data-auth-email]');
+				const required = document.querySelector('[data-auth-required]');
+				if (!(welcome instanceof HTMLElement)) return;
+
+				const setRequired = () => {
+					required && (required.style.display = 'block');
+					welcome.innerHTML = `Welcome! <span class="font-semibold text-red-500">Guest</span>`;
+				};
+
+				fetch(`${apiBase}/api/auth/me`, { credentials: 'include' })
+					.then((r) => (r.ok ? r.json() : null))
+					.then((j) => {
+						const user = j?.data?.user;
+						if (!user) return setRequired();
+						const name = (user.name || user.email || 'User').trim();
+						welcome.innerHTML = `Welcome! <span class="font-semibold text-red-500">${name}</span>`;
+						if (first instanceof HTMLInputElement) first.value = (name.split(' ')[0] || '').trim();
+						if (last instanceof HTMLInputElement) last.value = (name.split(' ').slice(1).join(' ') || '').trim();
+						if (email instanceof HTMLInputElement) email.value = (user.email || '').trim();
+					})
+					.catch(() => setRequired());
+			})();
+		</script>
+	</div>
+</Layout>

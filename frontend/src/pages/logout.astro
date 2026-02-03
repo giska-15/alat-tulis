@@ -1,0 +1,40 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+---
+
+<Layout title="Logout | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-20 text-center">
+				<h1 class="text-2xl font-semibold">Kamu sudah logout</h1>
+				<p class="mt-2 text-sm text-zinc-600">Sampai jumpa lagi. Kamu bisa login kembali kapan saja.</p>
+				<a href="/login" class="mt-6 inline-flex rounded bg-red-500 px-8 py-3 text-sm font-semibold text-white hover:bg-red-600">Login</a>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline define:vars={{ apiBase }}>
+			(() => {
+				try {
+					fetch(`${apiBase}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+				} catch {}
+				try {
+					window.localStorage.removeItem('exclusive_google_user_v1');
+					window.dispatchEvent(new CustomEvent('auth:changed'));
+				} catch {}
+				try {
+					window.google?.accounts?.id?.disableAutoSelect?.();
+				} catch {}
+			})();
+		</script>
+	</div>
+</Layout>

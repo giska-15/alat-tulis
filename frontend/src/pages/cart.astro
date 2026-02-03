@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { formatRupiah } from "../lib/api";
+---
+
+<Layout title="Cart | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Cart" }]} />
+
+				<div class="mt-10 overflow-x-auto rounded bg-white ring-1 ring-zinc-200">
+					<table class="w-full min-w-[720px] text-left text-sm">
+						<thead class="border-b border-zinc-100 text-zinc-500">
+							<tr>
+								<th class="px-6 py-4 font-semibold">Product</th>
+								<th class="px-6 py-4 font-semibold">Price</th>
+								<th class="px-6 py-4 font-semibold">Quantity</th>
+								<th class="px-6 py-4 font-semibold">Subtotal</th>
+							</tr>
+						</thead>
+						<tbody data-cart-body>
+							<tr class="hidden" data-cart-empty>
+								<td class="px-6 py-10 text-center text-sm text-zinc-600" colspan="4">Cart kamu masih kosong.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<a href="/products" class="rounded border border-zinc-300 px-6 py-3 text-sm font-semibold hover:bg-zinc-50">Return To Shop</a>
+					<button type="button" class="rounded border border-zinc-300 px-6 py-3 text-sm font-semibold hover:bg-zinc-50">Update Cart</button>
+				</div>
+
+				<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-12">
+					<div class="md:col-span-7">
+						<div class="flex gap-4">
+							<input class="h-12 w-full rounded border border-zinc-300 px-4 text-sm outline-none" placeholder="Coupon Code" />
+							<button type="button" class="h-12 rounded bg-red-500 px-7 text-sm font-semibold text-white hover:bg-red-600">Apply Coupon</button>
+						</div>
+					</div>
+
+					<aside class="md:col-span-5">
+						<div class="rounded border border-zinc-800/30 p-6">
+							<p class="text-lg font-semibold">Cart Total</p>
+							<div class="mt-5 space-y-4 text-sm">
+								<div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+									<span class="text-zinc-600">Subtotal:</span>
+									<span class="font-semibold" data-cart-subtotal>{formatRupiah(0)}</span>
+								</div>
+								<div class="flex items-center justify-between border-b border-zinc-100 pb-4">
+									<span class="text-zinc-600">Shipping:</span>
+									<span class="font-semibold" data-cart-shipping>Free</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<span class="text-zinc-600">Total:</span>
+									<span class="font-semibold" data-cart-total>{formatRupiah(0)}</span>
+								</div>
+							</div>
+							<a href="/checkout" class="mt-6 flex justify-center rounded bg-red-500 px-6 py-3 text-sm font-semibold text-white hover:bg-red-600">Process to checkout</a>
+						</div>
+					</aside>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline>
+			const tbody = document.querySelector('[data-cart-body]');
+			const empty = document.querySelector('[data-cart-empty]');
+			const subtotalEl = document.querySelector('[data-cart-subtotal]');
+			const shippingEl = document.querySelector('[data-cart-shipping]');
+			const totalEl = document.querySelector('[data-cart-total]');
+			if (tbody instanceof HTMLElement && empty instanceof HTMLElement && subtotalEl instanceof HTMLElement && shippingEl instanceof HTMLElement && totalEl instanceof HTMLElement) {
+				const render = () => window.ExclusiveStore?.renderCartTable?.({ tbody, empty, subtotalEl, shippingEl, totalEl });
+				render();
+				window.addEventListener('store:cart', render);
+			}
+		</script>
+	</div>
+</Layout>

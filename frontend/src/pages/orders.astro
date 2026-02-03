@@ -1,0 +1,184 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SiteTopBar from "../components/SiteTopBar.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+
+<Layout title="My Orders | Exclusive">
+	<div id="top" class="bg-white text-zinc-900">
+		<SiteTopBar />
+		<SiteHeader active="none" accountName="Mirza" />
+
+		<main class="mx-auto max-w-6xl px-4">
+			<section class="py-8">
+				<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "My Orders" }]} />
+				<div class="mt-10 rounded bg-white p-6 ring-1 ring-zinc-200">
+					<h1 class="text-xl font-semibold">Riwayat Pesanan</h1>
+					<p class="mt-2 text-sm text-zinc-600">Daftar pesanan kamu akan tampil di bawah ini.</p>
+
+					<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+						<input
+							data-orders-search
+							class="h-11 w-full rounded border border-zinc-300 px-4 text-sm outline-none"
+							placeholder="Cari invoice atau nomor resi"
+						/>
+						<button
+							data-orders-search-btn
+							type="button"
+							class="h-11 rounded bg-zinc-900 px-5 text-sm font-semibold text-white hover:bg-black"
+						>
+							Cari
+						</button>
+					</div>
+
+					<div class="mt-6 grid grid-cols-1 gap-4" data-orders-list>
+						<div class="rounded border border-zinc-200 bg-zinc-50 p-4">
+							<p class="text-sm text-zinc-600">Memuat pesanan...</p>
+						</div>
+					</div>
+
+					<p class="mt-6 hidden text-sm text-zinc-600" data-orders-empty>
+						Belum ada pesanan. Silakan checkout produk terlebih dulu.
+					</p>
+
+					<p class="mt-3 hidden text-sm text-red-600" data-orders-error></p>
+				</div>
+			</section>
+		</main>
+
+		<SiteFooter />
+
+		<script is:inline>
+			const FIXED_CUSTOMER_IDS = ['24090060', '24090055'];
+
+			const listEl = document.querySelector('[data-orders-list]');
+			const emptyEl = document.querySelector('[data-orders-empty]');
+			const errEl = document.querySelector('[data-orders-error]');
+			const searchEl = document.querySelector('[data-orders-search]');
+			const searchBtn = document.querySelector('[data-orders-search-btn]');
+
+			const formatRupiah = (n) => {
+				try {
+					return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(n || 0));
+				} catch {
+					return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+				}
+			};
+
+			const getTracking = (orderId) => {
+				try {
+					const raw = localStorage.getItem('exclusive_tracking_by_order');
+					const map = raw ? JSON.parse(raw) : {};
+					return map && orderId != null ? map[String(orderId)] || null : null;
+				} catch {
+					return null;
+				}
+			};
+
+			async function loadOrders(q) {
+				if (!(listEl instanceof HTMLElement)) return;
+				if (errEl instanceof HTMLElement) errEl.classList.add('hidden');
+				if (emptyEl instanceof HTMLElement) emptyEl.classList.add('hidden');
+				listEl.innerHTML = '';
+
+				try {
+					let customerId = localStorage.getItem('exclusive_customer_id');
+					if (customerId && !FIXED_CUSTOMER_IDS.includes(String(customerId))) {
+						customerId = FIXED_CUSTOMER_IDS[0];
+						localStorage.setItem('exclusive_customer_id', String(customerId));
+					}
+					if (!customerId) {
+						if (emptyEl instanceof HTMLElement) {
+							emptyEl.textContent = 'Belum ada pesanan untuk akun ini. Silakan checkout dulu.';
+							emptyEl.classList.remove('hidden');
+						}
+						return;
+					}
+					const params = new URLSearchParams();
+					params.set('customerId', String(customerId));
+					const qq = String(q || '').trim();
+					if (qq) params.set('q', qq);
+					const res = await fetch(`/api/sales?${params.toString()}`, { headers: { Accept: 'application/json' } });
+					const json = await res.json().catch(() => null);
+					if (!res.ok) throw new Error(json?.error?.message || `Request failed: ${res.status}`);
+					const rows = Array.isArray(json?.data) ? json.data : [];
+
+					if (!rows.length) {
+						if (emptyEl instanceof HTMLElement) emptyEl.classList.remove('hidden');
+						return;
+					}
+
+					rows.slice(0, 20).forEach((o) => {
+						const orderId = o?.id;
+						const invoice = o?.receiptNumber || (orderId != null ? `INV-${orderId}` : '-');
+						const resi = o?.trackingNumber || getTracking(orderId);
+						const total = formatRupiah(o?.total || 0);
+						const date = o?.orderDate ? new Date(o.orderDate).toLocaleString('id-ID') : '-';
+						const itemCount = Array.isArray(o?.items) ? o.items.reduce((s, it) => s + Number(it?.qty || 0), 0) : 0;
+
+						const card = document.createElement('a');
+						card.href = orderId != null ? `/orders/${encodeURIComponent(String(orderId))}` : '/orders';
+						card.className = 'block rounded border border-zinc-200 p-5 hover:bg-zinc-50';
+						card.innerHTML = `
+							<div class="flex items-start justify-between gap-4">
+								<div>
+									<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Invoice</p>
+									<p class="mt-1 text-base font-semibold">${invoice}</p>
+									<p class="mt-1 text-xs text-zinc-500">${date}</p>
+								</div>
+								<div class="text-right">
+									<p class="text-xs text-zinc-500">Total</p>
+									<p class="mt-1 text-base font-semibold">${total}</p>
+									<p class="mt-1 inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">Diproses</p>
+								</div>
+							</div>
+							<div class="mt-4 grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
+								<div class="flex items-center justify-between gap-4 md:block">
+									<span class="text-zinc-600">Order ID</span>
+									<span class="font-semibold md:ml-2">${orderId != null ? String(orderId) : '-'}</span>
+								</div>
+								<div class="flex items-center justify-between gap-4 md:block">
+									<span class="text-zinc-600">Item</span>
+									<span class="font-semibold md:ml-2">${itemCount}</span>
+								</div>
+								<div class="flex items-center justify-between gap-4 md:block">
+									<span class="text-zinc-600">Nomor Resi</span>
+									<span class="font-semibold md:ml-2">${resi || '-'}</span>
+								</div>
+							</div>
+						`;
+
+						listEl.appendChild(card);
+					});
+				} catch (e) {
+					if (errEl instanceof HTMLElement) {
+						errEl.textContent = e?.message || 'Gagal memuat pesanan.';
+						errEl.classList.remove('hidden');
+					}
+					if (emptyEl instanceof HTMLElement) emptyEl.classList.remove('hidden');
+				}
+			}
+
+			const runSearch = () => {
+				const q = searchEl instanceof HTMLInputElement ? searchEl.value : '';
+				loadOrders(q);
+			};
+
+			if (searchBtn instanceof HTMLButtonElement) {
+				searchBtn.addEventListener('click', runSearch);
+			}
+			if (searchEl instanceof HTMLInputElement) {
+				searchEl.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						runSearch();
+					}
+				});
+			}
+
+			loadOrders('');
+		</script>
+	</div>
+</Layout>

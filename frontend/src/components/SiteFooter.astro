@@ -1,0 +1,81 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-16 bg-black text-white" id="about">
+	<div class="mx-auto max-w-6xl px-4 py-12">
+		<div class="grid grid-cols-1 gap-10 md:grid-cols-5">
+			<div class="md:col-span-1">
+				<p class="text-lg font-semibold">Exclusive</p>
+				<p class="mt-3 text-sm text-white/70">Subscribe</p>
+				<p class="mt-1 text-sm text-white/60">Get 10% off your first order</p>
+				<div class="mt-4 flex rounded bg-white/10 ring-1 ring-white/10">
+					<input class="w-full bg-transparent px-3 py-2 text-sm outline-none placeholder:text-white/40" placeholder="Enter your email" />
+					<button class="px-3 text-sm font-semibold" type="button" aria-label="Submit email">→</button>
+				</div>
+			</div>
+			<div>
+				<p class="text-sm font-semibold">Support</p>
+				<p class="mt-3 text-sm text-white/70">111 Bijoy sarani, Dhaka, DH 1515, Bangladesh.</p>
+				<p class="mt-2 text-sm text-white/70">exclusive@gmail.com</p>
+				<p class="mt-2 text-sm text-white/70">+88015-88888-9999</p>
+			</div>
+			<div>
+				<p class="text-sm font-semibold">Account</p>
+				<ul class="mt-3 space-y-2 text-sm text-white/70">
+					<li><a class="hover:text-white" href="/login">Login / Register</a></li>
+					<li><a class="hover:text-white" href="/cart">Cart</a></li>
+					<li><a class="hover:text-white" href="/wishlist">Wishlist</a></li>
+					<li><a class="hover:text-white" href="/products">Shop</a></li>
+				</ul>
+			</div>
+			<div id="contact">
+				<p class="text-sm font-semibold">Quick Link</p>
+				<ul class="mt-3 space-y-2 text-sm text-white/70">
+					<li><a class="hover:text-white" href="#">Privacy Policy</a></li>
+					<li><a class="hover:text-white" href="#">Terms Of Use</a></li>
+					<li><a class="hover:text-white" href="#">FAQ</a></li>
+					<li><a class="hover:text-white" href="/contact">Contact</a></li>
+				</ul>
+			</div>
+			<div>
+				<p class="text-sm font-semibold">Download App</p>
+				<p class="mt-2 text-xs text-white/60">Save $3 with App New User Only</p>
+				<div class="mt-3 grid grid-cols-2 gap-3">
+					<div class="grid h-20 w-20 place-items-center rounded bg-white p-1 ring-1 ring-white/10">
+						<img
+							src="/images/qris.png"
+							alt="QRIS"
+							class="h-full w-full object-contain"
+							loading="lazy"
+							decoding="async"
+							onerror="this.onerror=null; this.src='/images/qris-placeholder.svg';"
+						/>
+					</div>
+					<div class="space-y-2">
+						<div class="grid h-9 place-items-center rounded bg-white/10 text-xs text-white/60">Google Play</div>
+						<div class="grid h-9 place-items-center rounded bg-white/10 text-xs text-white/60">App Store</div>
+					</div>
+				</div>
+				<div class="mt-5 flex items-center gap-4 text-white/80">
+					<a href="#" aria-label="Facebook" class="hover:text-white">
+						<svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M14 8h2V5h-2c-2.2 0-4 1.8-4 4v2H8v3h2v7h3v-7h2.2l.8-3H13V9c0-.6.4-1 1-1Z"/></svg>
+					</a>
+					<a href="#" aria-label="Twitter" class="hover:text-white">
+						<svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M20 7.7c.01.2.01.4.01.6 0 6.1-4.6 10.4-10.4 10.4-2.1 0-4-.6-5.6-1.6h.8c1.7 0 3.3-.6 4.5-1.6-1.6 0-2.9-1.1-3.4-2.6.2 0 .4.1.7.1.3 0 .6 0 .9-.1-1.7-.3-3-1.8-3-3.6v-.1c.5.3 1.1.5 1.7.5-1-.7-1.6-1.8-1.6-3.1 0-.7.2-1.4.6-1.9 1.8 2.2 4.5 3.6 7.5 3.8-.1-.3-.1-.6-.1-1 0-2.1 1.7-3.8 3.8-3.8 1.1 0 2 .4 2.7 1.1.8-.2 1.6-.5 2.3-.9-.3.8-.9 1.4-1.7 1.8.7-.1 1.4-.3 2-.6-.5.7-1 1.3-1.7 1.8Z"/></svg>
+					</a>
+					<a href="#" aria-label="Instagram" class="hover:text-white">
+						<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.5"/><path d="M17 7h.01"/></svg>
+					</a>
+					<a href="#" aria-label="LinkedIn" class="hover:text-white">
+						<svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><path d="M6.5 6.5A1.5 1.5 0 1 1 6.5 3a1.5 1.5 0 0 1 0 3.5ZM5 21V9h3v12H5Zm6 0V9h3v1.7c.6-1.1 1.8-2 3.6-2 2.5 0 4.4 1.6 4.4 5V21h-3v-6.2c0-1.7-.6-2.8-2.2-2.8-1.2 0-2 .8-2.3 1.6-.1.3-.1.8-.1 1.2V21h-3Z"/></svg>
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/50">
+			© Copyright Rimel {year}. All right reserved
+		</div>
+	</div>
+</footer>

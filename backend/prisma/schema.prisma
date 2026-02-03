@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ProductCategory {
+  id   String @id @db.Char(2) @map("CATEGORY_ID")
+  name String @unique @db.VarChar(20) @map("CATEGORY")
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id         Int      @id @default(autoincrement()) @map("PRODUCT_ID")
+  name       String   @unique @db.VarChar(40) @map("PRODUCT_NAME")
+  price      Int      @map("PRICE")
+  categoryId String   @db.Char(2) @map("CATEGORY_ID")
+  createdAt  DateTime @db.Date @map("CREATED_AT")
+  createdBy  String   @db.VarChar(40) @map("CREATED_BY")
+  updatedAt  DateTime @db.Date @map("UPDATED_AT")
+  updatedBy  String   @db.VarChar(40) @map("UPDATED_BY")
+  stock      Int?     @map("STOCK")
+
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderDetails DetailPenjualan[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model Customer {
+  id            String   @id @db.Char(8) @map("CUST_ID")
+  name          String   @db.VarChar(45) @map("CUST_NAME")
+  address       String   @db.VarChar(100) @map("ADDRESS")
+  placeOfBirth  String   @db.VarChar(25) @map("PLACE_OF_BIRTH")
+  dateOfBirth   DateTime @db.Date @map("DATE_OF_BIRTH")
+  contactNumber String   @unique @db.VarChar(14) @map("CONTACT_NUMBER")
+  email         String   @unique @db.VarChar(40) @map("EMAIL")
+  genderId      String   @db.Char(1) @map("GENDER_ID")
+  createdAt     DateTime? @db.Date @map("CREATED_AT")
+  createdBy     String?  @db.VarChar(35) @map("CREATED_BY")
+  updatedAt     DateTime? @db.Date @map("UPDATED_AT")
+  updatedBy     String?  @db.VarChar(35) @map("UPDATED_BY")
+
+  gender Gender @relation(fields: [genderId], references: [id], onDelete: Restrict)
+  sales  Penjualan[]
+
+  @@map("customers")
+}
+
+model Gender {
+  id     String @id @db.Char(1) @map("GENDER_ID")
+  gender String @db.Char(9) @map("GENDER")
+
+  customers Customer[]
+  cashiers  Cashier[]
+
+  @@map("genders")
+}
+
+model Cashier {
+  id            String   @id @db.Char(8) @map("USER_ID")
+  username      String   @db.VarChar(45) @map("USERNAME")
+  address       String   @db.VarChar(100) @map("ADDRESS")
+  placeOfBirth  String   @db.VarChar(25) @map("PLACE_OF_BIRTH")
+  dateOfBirth   DateTime @db.Date @map("DATE_OF_BIRTH")
+  contactNumber String   @unique @db.VarChar(14) @map("CONTACT_NUMBER")
+  email         String   @unique @db.VarChar(40) @map("EMAIL")
+  genderId      String   @db.Char(1) @map("GENDER_ID")
+  createdAt     DateTime @db.Date @map("CREATED_AT")
+  updatedAt     DateTime @db.Date @map("UPDATED_AT")
+  password      String   @db.VarChar(35) @map("PASSWORD")
+
+  gender Gender @relation(fields: [genderId], references: [id], onDelete: Restrict)
+  sales  Penjualan[]
+
+  @@map("cashiers")
+}
+
+model PaymentMethod {
+  id     String @id @db.Char(1) @map("METHOD_ID")
+  method String @db.VarChar(10) @map("METHOD")
+
+  sales Penjualan[]
+
+  @@map("payment_methods")
+}
+
+model Penjualan {
+  id            Int      @id @default(autoincrement()) @map("ORDER_ID")
+  orderDate     DateTime @map("ORDER_DATE")
+  customerId    String?  @db.Char(8) @map("CUST_ID")
+  cashierId     String   @db.Char(8) @map("USER_ID")
+  total         Int      @map("TOTAL")
+  methodId      String?  @db.Char(1) @map("METHOD_ID")
+  bankTrans     String?  @db.VarChar(25) @map("BANK_TRANS")
+  receiptNumber String?  @db.Char(20) @map("RECEIPT_NUMBER")
+  trackingNumber String? @db.VarChar(25) @map("TRACKING_NUMBER")
+
+  customer Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  cashier  Cashier       @relation(fields: [cashierId], references: [id], onDelete: Restrict)
+  method   PaymentMethod? @relation(fields: [methodId], references: [id], onDelete: Restrict)
+  items    DetailPenjualan[]
+
+  @@index([customerId])
+  @@index([cashierId])
+  @@index([methodId])
+  @@map("orders")
+}
+
+model DetailPenjualan {
+  orderId   Int @map("ORDER_ID")
+  productId Int @map("PRODUCT_ID")
+  qty       Int @default(1) @map("QTY")
+  price     Int @map("PRICE")
+
+  order   Penjualan @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, productId])
+  @@index([productId])
+  @@map("order_details")
+}

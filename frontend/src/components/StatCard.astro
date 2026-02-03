@@ -1,0 +1,49 @@
+---
+const { icon, value, label, active } = Astro.props as {
+	icon: "bag" | "coin" | "shop" | "money";
+	value: string;
+	label: string;
+	active?: boolean;
+};
+
+const base =
+	"grid place-items-center gap-3 rounded border border-zinc-200 px-6 py-7 text-center transition";
+const cls = active ? base + " bg-red-500 text-white border-red-500" : base + " bg-white text-zinc-700 hover:bg-zinc-50";
+---
+
+<div class={cls}>
+	<div class={(active ? "text-white" : "text-black") + " grid h-12 w-12 place-items-center rounded-full bg-zinc-100"}>
+		{icon === "bag" ? (
+			<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<path d="M7 7h10l2 3v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10l2-3Z" />
+				<path d="M9 7a3 3 0 0 1 6 0" />
+			</svg>
+		) : null}
+		{icon === "coin" ? (
+			<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<circle cx="12" cy="12" r="9" />
+				<path d="M12 7v10" />
+				<path d="M9.5 9.5c.8-1 4.2-1 5 0s-.3 2-2.5 2-3.3 1-2.5 2.5c.8 1.6 4.4 1.6 5.2 0" />
+			</svg>
+		) : null}
+		{icon === "shop" ? (
+			<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<path d="M4 9l2-5h12l2 5" />
+				<path d="M4 9v10h16V9" />
+				<path d="M9 19v-8h6v8" />
+			</svg>
+		) : null}
+		{icon === "money" ? (
+			<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+				<rect x="3" y="6" width="18" height="12" rx="2" />
+				<circle cx="12" cy="12" r="2.5" />
+				<path d="M7 10h.01" />
+				<path d="M17 14h.01" />
+			</svg>
+		) : null}
+	</div>
+	<div>
+		<p class="text-2xl font-semibold">{value}</p>
+		<p class={(active ? "text-white/90" : "text-zinc-500") + " text-sm"}>{label}</p>
+	</div>
+</div>

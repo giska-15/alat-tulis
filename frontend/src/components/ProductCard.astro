@@ -1,0 +1,81 @@
+---
+import Icons from "./Icons.astro";
+import type { Product } from "../lib/api";
+import { formatRupiah } from "../lib/api";
+import { fallbackProductImage, imgOnErrorTo } from "../lib/image";
+
+const { product } = Astro.props as { product: Product };
+
+const fallback = fallbackProductImage(product.id, product.name, product.category?.id);
+const imageSrc = product.imageUrl || fallback;
+---
+
+<article
+	class="group"
+	data-product={
+		JSON.stringify({
+			id: product.id,
+			name: product.name,
+			slug: product.slug,
+			price: product.price,
+			stock: product.stock,
+			// Persist the resolved image URL so cart/checkout shows the same image.
+			imageUrl: imageSrc,
+			category: product.category,
+		})
+	}
+>
+	<div class="relative overflow-hidden rounded bg-zinc-50 ring-1 ring-zinc-100">
+		<a
+			class="block aspect-[4/3] bg-white"
+			href={`/products/${product.id}`}
+			aria-label={`Lihat detail ${product.name}`}
+		>
+			<img
+				src={imageSrc}
+				alt={product.name}
+				class="h-full w-full object-cover"
+				loading="lazy"
+				decoding="async"
+				onerror={imgOnErrorTo(fallback)}
+			/>
+		</a>
+		<div class="absolute right-2 top-2 flex flex-col gap-2">
+			<button
+				class="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-zinc-700 shadow ring-1 ring-zinc-200 hover:text-red-500"
+				type="button"
+				aria-label="Wishlist"
+				data-action="toggle-wishlist"
+				data-wishlist-state={String(product.id)}
+			>
+				<Icons name="heart" class="h-4 w-4" />
+			</button>
+			<button class="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-zinc-700 shadow ring-1 ring-zinc-200 hover:text-zinc-900" type="button" aria-label="Quick view">
+				<Icons name="eye" class="h-4 w-4" />
+			</button>
+		</div>
+		<button
+			class="absolute inset-x-0 bottom-0 translate-y-0 bg-black py-2 text-center text-sm font-medium text-white transition md:translate-y-full md:group-hover:translate-y-0"
+			type="button"
+			data-action="add-to-cart"
+		>
+			Add To Cart
+		</button>
+		<button
+			class="absolute inset-x-0 bottom-0 translate-y-0 bg-red-500 py-2 text-center text-sm font-semibold text-white transition md:translate-y-[calc(100%+44px)] md:group-hover:translate-y-0"
+			type="button"
+			data-action="buy-now"
+		>
+			Buy Now
+		</button>
+	</div>
+
+	<div class="mt-3 space-y-1">
+		<a class="line-clamp-2 text-sm font-medium text-zinc-900 hover:underline" href={`/products/${product.id}`}>{product.name}</a>
+		<p class="text-sm text-red-500">{formatRupiah(product.price)}</p>
+		<div class="flex items-center gap-2">
+			<span class="text-[11px] text-amber-400">★★★★★</span>
+			<span class="text-[11px] text-zinc-500">(65)</span>
+		</div>
+	</div>
+</article>
