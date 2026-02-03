@@ -23,9 +23,11 @@ export type HomePayload = {
 	themeCategoryId: string;
 };
 
-const IS_GITHUB_PAGES_BUILD = (import.meta.env.BASE_URL ?? "/") !== "/";
 const PUBLIC_API_BASE = import.meta.env.PUBLIC_API_BASE;
-const USE_DEMO_DATA = IS_GITHUB_PAGES_BUILD && !PUBLIC_API_BASE;
+
+// If a real backend isn't configured, use demo data for production deployments
+// (GitHub Pages, Vercel, etc). Keep local dev using the backend + Vite proxy.
+const USE_DEMO_DATA = !import.meta.env.DEV && !PUBLIC_API_BASE;
 
 const DEMO_CATEGORIES: Category[] = [
 	{ id: "AT", name: "Alat Tulis", slug: "alat-tulis" },
