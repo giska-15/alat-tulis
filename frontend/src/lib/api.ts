@@ -24,6 +24,8 @@ export type HomePayload = {
 };
 
 const IS_GITHUB_PAGES_BUILD = (import.meta.env.BASE_URL ?? "/") !== "/";
+const PUBLIC_API_BASE = import.meta.env.PUBLIC_API_BASE;
+const USE_DEMO_DATA = IS_GITHUB_PAGES_BUILD && !PUBLIC_API_BASE;
 
 const DEMO_CATEGORIES: Category[] = [
 	{ id: "AT", name: "Alat Tulis", slug: "alat-tulis" },
@@ -91,7 +93,7 @@ function demoFetchHome(): HomePayload {
 	};
 }
 
-const API_BASE = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:4000";
+const API_BASE = PUBLIC_API_BASE ?? "http://localhost:4000";
 
 type ApiEnvelope<T> = {
 	data: T;
@@ -119,12 +121,12 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchCategories();
+	if (USE_DEMO_DATA) return demoFetchCategories();
 	return apiFetch<Category[]>("/api/categories");
 }
 
 export async function fetchCategoriesSearch(params?: { q?: string }): Promise<Category[]> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchCategories();
+	if (USE_DEMO_DATA) return demoFetchCategories();
 	const sp = new URLSearchParams();
 	if (params?.q) sp.set("q", params.q);
 	const qs = sp.toString();
@@ -137,7 +139,7 @@ export async function fetchProducts(params?: {
 	limit?: number;
 	bestSelling?: boolean;
 }): Promise<Product[]> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchProducts(params);
+	if (USE_DEMO_DATA) return demoFetchProducts(params);
 	const sp = new URLSearchParams();
 	if (params?.q) sp.set("q", params.q);
 	if (params?.categoryId) sp.set("categoryId", params.categoryId);
@@ -148,12 +150,12 @@ export async function fetchProducts(params?: {
 }
 
 export async function fetchProduct(id: number): Promise<Product> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchProduct(id);
+	if (USE_DEMO_DATA) return demoFetchProduct(id);
 	return apiFetch<Product>(`/api/products/${id}`);
 }
 
 export async function fetchCategory(id: string): Promise<Category> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchCategory(id);
+	if (USE_DEMO_DATA) return demoFetchCategory(id);
 	return apiFetch<Category>(`/api/categories/${id}`);
 }
 
@@ -286,7 +288,7 @@ export async function deleteSale(id: number): Promise<void> {
 }
 
 export async function fetchHome(): Promise<HomePayload> {
-	if (IS_GITHUB_PAGES_BUILD) return demoFetchHome();
+	if (USE_DEMO_DATA) return demoFetchHome();
 	return apiFetch<HomePayload>("/api/public/home");
 }
 
